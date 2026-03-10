@@ -142,24 +142,8 @@ canvas#viz{display:block;width:100%;height:100%;}
 }
 /* 4 main knobs in a single row — 46px each */
 #mainK{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
-/* Secondary row: REGEN knob | FREEZE | REVERSE | SPACE knob */
 #secRow{display:flex;align-items:stretch;gap:5px;}
 .sk{flex:0 0 46px;}
-
-/* Footswitches */
-.fsw{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:6px 4px;gap:2px;cursor:pointer;
-  background:#0c0a05;border:1px solid var(--border);border-radius:7px;
-  font-family:'Space Mono',monospace;transition:all .2s;
-}
-.fsw .fi{font-size:13px;line-height:1;}
-.fsw .fn{font-size:7px;font-weight:700;letter-spacing:.14em;color:var(--t2);}
-.fsw .fh{font-size:5px;color:var(--t3);letter-spacing:.05em;}
-#frzBtn.on{background:#22d3ee0e;border-color:#22d3ee55;box-shadow:0 0 12px #22d3ee16;}
-#frzBtn.on .fn{color:#22d3ee;}
-#rvBtn.on{background:#a78bfa0e;border-color:#a78bfa55;box-shadow:0 0 12px #a78bfa16;}
-#rvBtn.on .fn{color:#a78bfa;}
 
 /* Knob component */
 .kw{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;}
@@ -208,7 +192,7 @@ canvas#viz{display:block;width:100%;height:100%;}
 .src-name{font-size:6px;letter-spacing:.12em;color:var(--t3);font-family:'Space Mono',monospace;}
 #scopeCanvas{display:block;width:100%;flex:1;min-height:0;}
 
-/* IO section — compact, no longer flex:1 */
+/* ── IO section ─────────────────────────────────────────────────────────── */
 #ioSec{
   flex-shrink:0;display:flex;flex-direction:column;
   padding:9px 14px 10px;
@@ -252,6 +236,144 @@ canvas#viz{display:block;width:100%;height:100%;}
 .f-brand{font-family:'Big Shoulders Display',sans-serif;font-size:8px;font-weight:900;letter-spacing:.16em;color:var(--a);opacity:.25;}
 .f-sep{font-size:6.5px;color:var(--t3);opacity:.35;}
 .f-tag{font-size:5.5px;color:var(--t3);letter-spacing:.1em;opacity:.45;}
+
+/* ── ENGINE ROW (secRow) ─────────────────────────────────────────────────── */
+#secRow{display:flex;align-items:stretch;gap:5px;}
+.sk{flex:0 0 46px;}
+#rvBtn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;padding:4px 8px;cursor:pointer;
+  background:#0a0803;border:1px solid var(--border);border-radius:6px;
+  font-family:'Space Mono',monospace;transition:all .2s;
+}
+#rvBtn .rv-icon{font-size:13px;line-height:1;}
+#rvBtn .rv-lbl{font-size:6.5px;font-weight:700;letter-spacing:.14em;color:var(--t3);}
+#rvBtn.on{background:#a78bfa0e;border-color:#a78bfa55;box-shadow:0 0 12px #a78bfa18;}
+#rvBtn.on .rv-lbl{color:#a78bfa;}
+
+/* ── LAYERS SECTION ──────────────────────────────────────────────────────── */
+#layersSection{
+  flex-shrink:0;
+  border-top:1px solid var(--border);
+}
+#layersHdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 12px 4px;
+  border-bottom:1px solid var(--border);
+  background:#060402;
+}
+.layers-lbl{font-size:6px;letter-spacing:.22em;color:var(--t3);font-family:'Space Mono',monospace;}
+#layerCards{display:flex;gap:0;border-top:none;}
+
+/* Each layer card */
+.layer-card{
+  flex:1;display:flex;flex-direction:column;
+  padding:10px 12px 10px;gap:0;
+  transition:background .25s,box-shadow .25s;
+  position:relative;overflow:hidden;
+  border-right:1px solid var(--border);
+  min-width:0;
+}
+.layer-card:last-child{border-right:none;}
+
+/* Frozen state — color floods background */
+.layer-card.frozen{
+  background:color-mix(in srgb,var(--sc) 14%,#060402);
+  box-shadow:inset 0 0 40px color-mix(in srgb,var(--sc) 8%,transparent);
+}
+/* Left edge accent bar */
+.layer-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--sc,var(--border));opacity:0;transition:opacity .25s;
+}
+.layer-card.frozen::before{opacity:1;}
+
+/* Empty state */
+.lc-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;min-height:72px;
+}
+.lc-tag{font-size:8px;letter-spacing:.28em;color:var(--t3);opacity:.35;font-family:'Space Mono',monospace;align-self:flex-start;}
+.lc-hint{font-size:6px;color:var(--t3);letter-spacing:.1em;opacity:.45;text-align:center;line-height:1.6;}
+
+/* Freeze button — empty state */
+.frz-btn{
+  width:100%;padding:8px 0;cursor:pointer;
+  background:transparent;border:1px dashed var(--border);border-radius:6px;
+  font-family:'Space Mono',monospace;transition:all .2s;margin-top:4px;
+}
+.frz-btn:hover{border-color:var(--a);border-style:solid;}
+.frz-btn .sfn{font-size:7.5px;font-weight:700;letter-spacing:.18em;color:var(--t3);display:block;text-align:center;}
+.frz-btn:hover .sfn{color:var(--a);}
+
+/* Re-freeze button — frozen state */
+.frz-btn.refreezing{
+  border-style:solid;
+  border-color:var(--sc,var(--a));
+}
+.frz-btn.refreezing .sfn{color:var(--sc,var(--a));}
+
+/* Active state — shown when frozen */
+.lc-active{
+  display:none;flex-direction:column;gap:8px;
+}
+/* Algo name — large, visible, branded */
+.lc-algo-row{display:flex;align-items:baseline;gap:6px;justify-content:space-between;}
+.lc-algo-name{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:18px;font-weight:800;letter-spacing:.04em;
+  line-height:1;transition:color .25s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  flex:1;
+}
+.lc-algo-badge{
+  font-size:6px;letter-spacing:.2em;color:var(--t3);font-family:'Space Mono',monospace;
+  flex-shrink:0;opacity:.6;
+}
+/* Pulsing grain indicator */
+.lc-pulse{
+  display:flex;align-items:center;gap:5px;margin-bottom:2px;
+}
+.lc-pulse-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--sc,var(--a));
+  box-shadow:0 0 8px var(--sc,var(--a));
+  animation:pulse-ring 1.4s ease-out infinite;
+  flex-shrink:0;
+}
+@keyframes pulse-ring{
+  0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--sc,var(--a)) 70%,transparent);}
+  70%{box-shadow:0 0 0 6px transparent;}
+  100%{box-shadow:0 0 0 0 transparent;}
+}
+.lc-pulse-lbl{font-size:6px;letter-spacing:.16em;color:var(--t3);font-family:'Space Mono',monospace;}
+/* MIX slider */
+.lc-mix-row{display:flex;align-items:center;gap:6px;}
+.lc-mix-lbl{font-size:6px;letter-spacing:.14em;color:var(--t3);font-family:'Space Mono',monospace;flex-shrink:0;}
+.lc-mix-slider{
+  flex:1;height:4px;
+  -webkit-appearance:none;appearance:none;
+  background:var(--border);border-radius:2px;outline:none;cursor:pointer;
+}
+.lc-mix-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:12px;height:12px;border-radius:50%;
+  background:var(--sc,var(--a));cursor:pointer;
+  box-shadow:0 0 6px var(--sc,var(--a));transition:background .2s;
+}
+.lc-mix-slider::-moz-range-thumb{
+  width:12px;height:12px;border-radius:50%;border:none;
+  background:var(--sc,var(--a));cursor:pointer;
+}
+.lc-mix-val{font-size:8px;font-weight:700;letter-spacing:.04em;min-width:28px;text-align:right;transition:color .25s;}
+/* Clear button */
+.lc-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:2px;}
+.lc-clear{
+  font-size:6px;letter-spacing:.1em;padding:3px 8px;
+  border-radius:3px;border:1px solid var(--border);
+  background:transparent;color:var(--t3);
+  font-family:'Space Mono',monospace;cursor:pointer;transition:all .15s;
+}
+.lc-clear:hover{border-color:#ef4444;color:#ef4444;}
 </style>
 </head>
 <body>
@@ -318,13 +440,90 @@ canvas#viz{display:block;width:100%;height:100%;}
       <div id="mainK"></div>
       <div id="secRow">
         <div class="sk" id="skL"></div>
-        <button class="fsw" id="frzBtn" onclick="toggleFreeze()">
-          <span class="fi">❄</span><span class="fn">FREEZE</span><span class="fh">hold buffer</span>
-        </button>
-        <button class="fsw" id="rvBtn" onclick="toggleReverse()">
-          <span class="fi">↩</span><span class="fn">REVERSE</span><span class="fh">play back</span>
+        <button id="rvBtn" onclick="toggleReverse()">
+          <span class="rv-icon">↩</span>
+          <span class="rv-lbl">REVERSE</span>
         </button>
         <div class="sk" id="skR"></div>
+      </div>
+    </div>
+
+    <!-- ── LAYERS ── -->
+    <div id="layersSection">
+      <div id="layersHdr">
+        <span class="layers-lbl">── LAYERS</span>
+        <span id="frzBadge" class="frz-badge"></span>
+      </div>
+      <div id="layerCards">
+
+        <!-- Layer A Card -->
+        <div class="layer-card" id="slotA">
+          <!-- Empty state -->
+          <div class="lc-empty" id="slotEmptyA">
+            <span class="lc-tag">A</span>
+            <button class="frz-btn" id="frzBtnA" onclick="toggleFreezeA()">
+              <span class="sfn">❄  FREEZE A</span>
+            </button>
+            <span class="lc-hint">play something · hit FREEZE<br>locks this algo as a drone layer</span>
+          </div>
+          <!-- Active / Frozen state -->
+          <div class="lc-active" id="slotActiveA">
+            <div class="lc-algo-row">
+              <span class="lc-algo-name" id="slotNameA">—</span>
+              <span class="lc-algo-badge">A</span>
+            </div>
+            <div class="lc-pulse">
+              <div class="lc-pulse-dot"></div>
+              <span class="lc-pulse-lbl">DRONE ACTIVE</span>
+            </div>
+            <div class="lc-mix-row">
+              <span class="lc-mix-lbl">MIX</span>
+              <input class="lc-mix-slider" id="mixSliderA" type="range" min="0" max="1" step="0.01" value="0.75"
+                oninput="P.mixA=parseFloat(this.value);applyP('mixA',P.mixA)"/>
+              <span class="lc-mix-val" id="mixValA">0.75</span>
+            </div>
+            <div class="lc-actions">
+              <button class="frz-btn refreezing" id="frzBtnA_active" onclick="toggleFreezeA()" style="margin-top:0;padding:5px 0;">
+                <span class="sfn">↺  RE-FREEZE</span>
+              </button>
+              <button class="lc-clear" onclick="clearFreezeA()">✕ CLEAR</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer B Card -->
+        <div class="layer-card" id="slotB">
+          <div class="lc-empty" id="slotEmptyB">
+            <span class="lc-tag">B</span>
+            <button class="frz-btn" id="frzBtnB" onclick="toggleFreezeB()">
+              <span class="sfn">❄  FREEZE B</span>
+            </button>
+            <span class="lc-hint">switch algo first · FREEZE B<br>layer on top of A drone</span>
+          </div>
+          <div class="lc-active" id="slotActiveB">
+            <div class="lc-algo-row">
+              <span class="lc-algo-name" id="slotNameB">—</span>
+              <span class="lc-algo-badge">B</span>
+            </div>
+            <div class="lc-pulse">
+              <div class="lc-pulse-dot"></div>
+              <span class="lc-pulse-lbl">DRONE ACTIVE</span>
+            </div>
+            <div class="lc-mix-row">
+              <span class="lc-mix-lbl">MIX</span>
+              <input class="lc-mix-slider" id="mixSliderB" type="range" min="0" max="1" step="0.01" value="0.75"
+                oninput="P.mixB=parseFloat(this.value);applyP('mixB',P.mixB)"/>
+              <span class="lc-mix-val" id="mixValB">0.75</span>
+            </div>
+            <div class="lc-actions">
+              <button class="frz-btn refreezing" id="frzBtnB_active" onclick="toggleFreezeB()" style="margin-top:0;padding:5px 0;">
+                <span class="sfn">↺  RE-FREEZE</span>
+              </button>
+              <button class="lc-clear" onclick="clearFreezeB()">✕ CLEAR</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -428,14 +627,18 @@ const ALGOS=[
 // ─── State ────────────────────────────────────────────────────────────────────
 const REC_SECS=5;
 let aCtx=null,eng=null,stream=null,cap=null,analyser=null;
-let rBuf=null,rPos=0,frozen=false,rev=false,live=false,lastUpd=0,animId=null;
+let rBuf=null,rPos=0,rev=false,live=false,lastUpd=0,animId=null;
 let wGain,dGain,fbGain,rvGain,inputBus=null;
+let gainLive=null,gainA=null,gainB=null;
+let engA=null,engB=null;
+let frozenA=false,frozenB=false;
+let frozenAlgoA=null,frozenAlgoB=null;
 let midiAccess=null,activeNotes={},synthNodes={};
 // Grain scope state
 const gPlayheads=[];
 let midiActivity=0; // 0–1, pulsed on noteOn, decays each frame
 let curAlgo=ALGOS[0];
-const P={grainMs:200,density:9,pos:.5,spread:.12,pitch:1,blend:.75,fb:.25,rv:.65};
+const P={grainMs:200,density:9,pos:.5,spread:.12,pitch:1,blend:.75,fb:.25,rv:.65,mixA:.75,mixB:.75};
 
 // ─── Canvas setup ─────────────────────────────────────────────────────────────
 const cv=document.getElementById('viz'),ct=cv.getContext('2d');
@@ -668,10 +871,9 @@ function drawFrame(){
   ct.globalAlpha=1; ct.shadowBlur=0;
 
   // ── Frozen: ice-blue tint over the warm field ─────────────────────────────
-  if(frozen){
+  if(frozenA||frozenB){
     ct.fillStyle='rgba(100,220,255,.12)';
     ct.fillRect(0,0,CVW,CVH);
-    // Frost edge top
     const frost=ct.createLinearGradient(0,0,0,CVH*.4);
     frost.addColorStop(0,'rgba(180,240,255,.18)');
     frost.addColorStop(1,'rgba(180,240,255,0)');
@@ -687,14 +889,13 @@ function animLoop(){
 animLoop();
 
 // ─── Grain Scope: spawn + draw ────────────────────────────────────────────────
-function spawnGrainViz(pos,grainMs,pitch){
-  // One vertical playhead per grain fire: pos=buffer position (0–1),
-  // life decays over ~grainMs worth of frames (at 60fps)
+function spawnGrainViz(pos,grainMs,pitch,color){
+  color=color||curAlgo.color;
   gPlayheads.push({
     pos: Math.max(0,Math.min(1,pos)),
     life: 1,
     dec: 1/Math.max(4,(grainMs/1000)*60),
-    color: curAlgo.color,
+    color,
     pitch,
   });
 }
@@ -705,52 +906,83 @@ function drawScope(){
 
   const acol=curAlgo.color;
   const[ar,ag,ab]=hexRgb(acol);
-  const LH=SCH*0.5;   // each lane occupies half the canvas height
+  const LH=SCH*0.5;
   const t=Date.now()/1000;
 
   // ── Backgrounds ──────────────────────────────────────────────────────────────
-  ct2.fillStyle='#060402'; ct2.fillRect(0,0,SCW,LH);        // INPUT lane — slightly lighter
-  ct2.fillStyle='#030200'; ct2.fillRect(0,LH,SCW,LH);       // GRAINS lane — darker
+  ct2.fillStyle='#0a0806'; ct2.fillRect(0,0,SCW,LH);
+  ct2.fillStyle='#050402'; ct2.fillRect(0,LH,SCW,LH);
+  ct2.fillStyle='#251e12'; ct2.fillRect(0,LH-1,SCW,1);
 
-  // Lane divider
-  ct2.fillStyle='#251e12'; ct2.fillRect(0,LH,SCW,1);
+  // ── INPUT lane label ─────────────────────────────────────────────────────────
+  ct2.font='700 6px "Space Mono"';ct2.letterSpacing='0.18em';
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.55)`;
+  ct2.fillText('INPUT',8,14);
 
-  // ── Lane labels ───────────────────────────────────────────────────────────────
-  ct2.font='700 7px "Space Mono"';
-  ct2.letterSpacing='0.16em';
-  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.50)`;
-  ct2.fillText('INPUT',10,15);
-  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.50)`;
-  ct2.fillText('GRAINS',10,LH+15);
+  // ── GRAINS lane label + layer legend ─────────────────────────────────────────
+  ct2.font='700 6px "Space Mono"';ct2.letterSpacing='0.18em';
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.55)`;
+  ct2.fillText('GRAINS',8,LH+14);
+
+  // Layer legend — right side of grain header
+  let lx=SCW-8;
+  const legends=[
+    {lbl:'B',col:frozenAlgoB?.color,active:frozenB},
+    {lbl:'A',col:frozenAlgoA?.color,active:frozenA},
+    {lbl:'LIVE',col:acol,active:live},
+  ];
+  ct2.font='600 5.5px "Space Mono"';ct2.letterSpacing='0.1em';
+  legends.forEach(({lbl,col,active})=>{
+    if(!col)col='#444';
+    const[lr,lg2,lb]=hexRgb(col);
+    const alpha=active?0.75:0.2;
+    const tw=ct2.measureText(lbl).width;
+    lx-=tw; ct2.fillStyle=`rgba(${lr},${lg2},${lb},${alpha})`; ct2.fillText(lbl,lx,LH+14); lx-=14;
+    // dot
+    ct2.beginPath();ct2.arc(lx+8,LH+10,3,0,Math.PI*2);
+    ct2.fillStyle=`rgba(${lr},${lg2},${lb},${active?0.9:0.2})`;ct2.fill();
+    lx-=12;
+  });
 
   // ── INPUT LANE ────────────────────────────────────────────────────────────────
   const midY=LH*0.52;
-  const amp=LH*0.32;
+  const amp=LH*0.38;
 
   if(live&&analyser){
     analyser.getByteTimeDomainData(wvD);
 
-    // Guitar energy bar — bottom-right of input lane (thin horizontal level bar)
-    const bW=Math.max(2,audioEnergy*70);
-    const bX=SCW-bW-8; const bY=LH-10;
-    ct2.fillStyle='rgba(37,28,15,0.8)'; ct2.fillRect(SCW-80,bY,72,5);           // track
-    ct2.fillStyle=`rgba(232,85,24,${0.4+audioEnergy*0.55})`;
-    ct2.fillRect(bX,bY,bW,5);                                                    // fill
+    // Guitar energy level bar — thin, bottom of input lane
+    const bW=Math.max(2,audioEnergy*80);
+    const bX=SCW-bW-8; const bY=LH-9;
+    ct2.fillStyle='rgba(30,20,8,0.9)'; ct2.fillRect(SCW-88,bY,80,4);
+    ct2.fillStyle=`rgba(232,85,24,${0.5+audioEnergy*0.5})`;
+    ct2.fillRect(bX,bY,bW,4);
 
-    // Input waveform — glow pass
+    // Glow pass
     ct2.beginPath();
-    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.18)`;
-    ct2.lineWidth=4;
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.25)`;
+    ct2.lineWidth=6;
     for(let i=0;i<wvD.length;i++){
       const x=(i/(wvD.length-1))*SCW;
       const y=midY+((wvD[i]-128)/128)*amp;
       i===0?ct2.moveTo(x,y):ct2.lineTo(x,y);
     }
     ct2.stroke();
-    // Core white line (matches left-panel aesthetic)
+    // Algo-colored mid line
     ct2.beginPath();
-    ct2.strokeStyle='rgba(255,255,255,0.82)';
-    ct2.lineWidth=1.4;
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.60)`;
+    ct2.lineWidth=2;
+    ct2.shadowColor=acol; ct2.shadowBlur=12;
+    for(let i=0;i<wvD.length;i++){
+      const x=(i/(wvD.length-1))*SCW;
+      const y=midY+((wvD[i]-128)/128)*amp;
+      i===0?ct2.moveTo(x,y):ct2.lineTo(x,y);
+    }
+    ct2.stroke();
+    // Bright white core
+    ct2.beginPath();
+    ct2.strokeStyle='rgba(255,255,255,0.92)';
+    ct2.lineWidth=1.5;
     ct2.shadowColor=acol; ct2.shadowBlur=8;
     for(let i=0;i<wvD.length;i++){
       const x=(i/(wvD.length-1))*SCW;
@@ -759,51 +991,46 @@ function drawScope(){
     }
     ct2.stroke(); ct2.shadowBlur=0;
 
-    // Update DOM source indicator dots
     const gd=document.getElementById('guitarSrcDot');
     const md=document.getElementById('midiSrcDot');
     if(gd)gd.className='src-dot'+(audioEnergy>0.025?' guitar-on':'');
     if(md)md.className='src-dot'+(midiActivity>0.25?' midi-on':'');
 
   } else {
-    // Idle gentle sine
     ct2.beginPath();
-    ct2.strokeStyle='rgba(255,255,255,0.08)';
+    ct2.strokeStyle='rgba(255,255,255,0.10)';
     ct2.lineWidth=1.2;
     for(let i=0;i<SCW;i++){
       const y=midY+Math.sin(i/SCW*Math.PI*5+t*0.5)*3;
       i===0?ct2.moveTo(i,y):ct2.lineTo(i,y);
     }
     ct2.stroke();
-    // Reset dots
     const gd=document.getElementById('guitarSrcDot');
     const md=document.getElementById('midiSrcDot');
     if(gd)gd.className='src-dot';
     if(md)md.className='src-dot';
   }
 
-  // MIDI activity decay
   midiActivity*=0.93;
 
-  // Source labels — bottom of INPUT lane (small, letterspace)
-  ct2.font='600 5.5px "Space Mono"';
-  ct2.letterSpacing='0.12em';
-  ct2.fillStyle=`rgba(232,85,24,${live?0.40+audioEnergy*0.45:0.18})`;
-  ct2.fillText('GUITAR',10,LH-6);
-  ct2.fillStyle=`rgba(${ar},${ag},${ab},${live?0.25+midiActivity*0.55:0.15})`;
-  ct2.fillText('MIDI',58,LH-6);
+  // GUITAR / MIDI labels bottom of INPUT lane
+  ct2.font='600 5.5px "Space Mono"';ct2.letterSpacing='0.12em';
+  ct2.fillStyle=`rgba(232,85,24,${live?0.45+audioEnergy*0.5:0.18})`;
+  ct2.fillText('GUITAR',8,LH-5);
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},${live?0.30+midiActivity*0.55:0.15})`;
+  ct2.fillText('MIDI',58,LH-5);
 
   // ── GRAINS LANE ───────────────────────────────────────────────────────────────
   const gY0=LH;
   const gMid=gY0+LH*0.5;
   const gAmp=LH*0.25;
 
-  // Buffer waveform — very faint, gives spatial context to playheads
+  // Buffer waveform — faint context
   if(rBuf&&rPos>2048&&aCtx){
     const RS=Math.floor(aCtx.sampleRate*5);
     const len=Math.min(rPos,RS);
     ct2.beginPath();
-    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.16)`;
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.14)`;
     ct2.lineWidth=1;
     for(let i=0;i<SCW;i++){
       const idx=Math.floor((i/SCW)*len)%RS;
@@ -813,52 +1040,43 @@ function drawScope(){
     }
     ct2.stroke();
   } else {
-    // Flat centre line when no buffer yet
     ct2.beginPath();
-    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.1)`;
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.10)`;
     ct2.lineWidth=1;
     ct2.moveTo(0,gMid); ct2.lineTo(SCW,gMid);
     ct2.stroke();
   }
 
-  // Grain playhead vertical lines
+  // Grain playhead vertical lines — colored by source engine
   for(let i=gPlayheads.length-1;i>=0;i--){
     const g=gPlayheads[i];
     g.life-=g.dec;
     if(g.life<=0){gPlayheads.splice(i,1);continue;}
 
-    const[gr,gg2,gb]=hexRgb(g.color);
+    const[gr,gg2,gb2]=hexRgb(g.color);
     const x=g.pos*SCW;
     const lineH=LH*0.68;
     const lineY=gY0+(LH-lineH)*0.5;
     const alpha=g.life;
 
-    // Wide soft glow
     ct2.lineWidth=5;
-    ct2.strokeStyle=`rgba(${gr},${gg2},${gb},${alpha*0.22})`;
-    ct2.shadowColor=g.color; ct2.shadowBlur=10*alpha;
+    ct2.strokeStyle=`rgba(${gr},${gg2},${gb2},${alpha*0.28})`;
+    ct2.shadowColor=g.color; ct2.shadowBlur=12*alpha;
     ct2.beginPath(); ct2.moveTo(x,lineY); ct2.lineTo(x,lineY+lineH); ct2.stroke();
 
-    // Bright core
-    ct2.lineWidth=1.2;
-    ct2.strokeStyle=`rgba(255,255,255,${alpha*0.88})`;
+    ct2.lineWidth=1.5;
+    ct2.strokeStyle=`rgba(${gr},${gg2},${gb2},${alpha*0.95})`;
     ct2.shadowBlur=5*alpha;
     ct2.beginPath(); ct2.moveTo(x,lineY); ct2.lineTo(x,lineY+lineH); ct2.stroke();
     ct2.shadowBlur=0;
   }
 
-  // Algo name — bottom-right of GRAINS lane
-  ct2.font='700 6.5px "Space Mono"';
-  ct2.letterSpacing='0.12em';
-  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.38)`;
-  const tw=ct2.measureText(curAlgo.name).width;
-  ct2.fillText(curAlgo.name,SCW-tw-10,gY0+LH-6);
-
-  // Grain count — bottom-left of GRAINS lane
+  // Grain count bottom-left
   const gc=gPlayheads.length;
+  ct2.font='700 6px "Space Mono"';ct2.letterSpacing='0.1em';
   if(gc>0){
-    ct2.fillStyle=`rgba(${ar},${ag},${ab},0.32)`;
-    ct2.fillText(`${gc} GRAIN${gc!==1?'S':''}`,10,gY0+LH-6);
+    ct2.fillStyle=`rgba(${ar},${ag},${ab},0.35)`;
+    ct2.fillText(`${gc}`,8,gY0+LH-5);
   }
 }
 
@@ -1045,6 +1263,8 @@ function applyP(k,v){
   if(k==='blend'){if(wGain)wGain.gain.value=v;if(dGain)dGain.gain.value=1-v;}
   if(k==='fb'&&fbGain)fbGain.gain.value=v;
   if(k==='rv'&&rvGain)rvGain.gain.value=v*.6;
+  if(k==='mixA'&&gainA&&frozenA){gainA.gain.setTargetAtTime(v,aCtx.currentTime,.02);const el=document.getElementById('mixValA');if(el)el.textContent=v.toFixed(2);}
+  if(k==='mixB'&&gainB&&frozenB){gainB.gain.setTargetAtTime(v,aCtx.currentTime,.02);const el=document.getElementById('mixValB');if(el)el.textContent=v.toFixed(2);}
 }
 
 function mkIR(ctx){
@@ -1054,7 +1274,7 @@ function mkIR(ctx){
 }
 
 class GranularEngine{
-  constructor(ctx,dest,gf){Object.assign(this,{ctx,dest,gf,fwd:null,rev:null,grainMs:150,density:8,pos:.5,spread:.15,pitch:1,reverse:false,active:false,_t:null});}
+  constructor(ctx,dest,gf){Object.assign(this,{ctx,dest,gf,fwd:null,rev:null,grainMs:150,density:8,pos:.5,spread:.15,pitch:1,reverse:false,active:false,_t:null,vizColor:null});}
   setBuffers(f,r){this.fwd=f;this.rev=r;}
   _fire(){
     const buf=this.reverse?this.rev:this.fwd;if(!buf||!this.active)return;
@@ -1069,7 +1289,7 @@ class GranularEngine{
     src.connect(env);env.connect(this.dest);
     src.start(now,fPos*Math.max(0,buf.duration-fGs),fGs+.01);src.stop(now+fGs+.06);
     spawnPart();
-    spawnGrainViz(fPos,fGs*1000,fP);
+    spawnGrainViz(fPos,fGs*1000,fP,this.vizColor||curAlgo.color);
   }
   _tick(){this._fire();if(!this.active)return;this._t=setTimeout(()=>this._tick(),((0.6+Math.random()*.8)/this.density)*1e3);}
   start(){this.active=true;this._tick();}
@@ -1133,7 +1353,6 @@ async function toggleActivate(){
     // Capture path: inputBus → scriptProcessor (silent — capture only)
     cap=ac.createScriptProcessor(4096,1,1);
     cap.onaudioprocess=e=>{
-      if(frozen)return;
       const inp=e.inputBuffer.getChannelData(0);
       const RS=Math.floor(ac.sampleRate*REC_SECS);
       for(let i=0;i<inp.length;i++)rBuf[(rPos+i)%RS]=inp[i];
@@ -1144,7 +1363,7 @@ async function toggleActivate(){
     inputBus.connect(cap);
     const sg=ac.createGain();sg.gain.value=0;cap.connect(sg);sg.connect(ac.destination);
 
-    // Wet/granular path
+    // Wet/granular path — shared effects bus
     const gb=ac.createGain();gb.gain.value=1.15;
     const conv=ac.createConvolver();conv.buffer=mkIR(ac);
     rvGain=ac.createGain();rvGain.gain.value=P.rv*.6;
@@ -1154,9 +1373,21 @@ async function toggleActivate(){
     wGain=ac.createGain();wGain.gain.value=P.blend;
     gb.connect(dly);gb.connect(conv);conv.connect(rvGain);rvGain.connect(wGain);dly.connect(wGain);wGain.connect(ac.destination);
 
-    eng=new GranularEngine(ac,gb,curAlgo.gf);
+    // Per-layer gain nodes — all feed shared wet bus
+    gainLive=ac.createGain();gainLive.gain.value=1.0;gainLive.connect(gb);
+    gainA=ac.createGain();gainA.gain.value=0;gainA.connect(gb);
+    gainB=ac.createGain();gainB.gain.value=0;gainB.connect(gb);
+
+    // Live engine — always runs, always updates with latest buffer
+    eng=new GranularEngine(ac,gainLive,curAlgo.gf);
     Object.assign(eng,{grainMs:P.grainMs,density:P.density,pos:P.pos,spread:P.spread,pitch:P.pitch,reverse:rev});
-    eng.start();live=true;
+    eng.start();
+
+    // Frozen engines — pre-created, inactive until freeze is triggered
+    engA=new GranularEngine(ac,gainA,ALGOS[0].gf);
+    engB=new GranularEngine(ac,gainB,ALGOS[0].gf);
+
+    live=true;
 
     document.getElementById('devSel').disabled=true;
     document.getElementById('actBtn').textContent='■  DEACTIVATE';
@@ -1174,12 +1405,14 @@ async function toggleActivate(){
 }
 
 function stopAll(){
-  // Release all MIDI notes
   Object.keys(synthNodes).forEach(n=>noteOff(parseInt(n)));
-  eng?.stop();cap?.disconnect();stream?.getTracks().forEach(t=>t.stop());aCtx?.close();
-  rBuf=null;rPos=0;lastUpd=0;frozen=false;rev=false;live=false;inputBus=null;
-  gPlayheads.length=0; midiActivity=0;
-  eng=aCtx=stream=cap=null;
+  eng?.stop();engA?.stop();engB?.stop();
+  cap?.disconnect();stream?.getTracks().forEach(t=>t.stop());aCtx?.close();
+  rBuf=null;rPos=0;lastUpd=0;rev=false;live=false;inputBus=null;
+  gainLive=gainA=gainB=null;
+  frozenA=false;frozenAlgoA=null;frozenB=false;frozenAlgoB=null;
+  eng=engA=engB=aCtx=stream=cap=null;
+  gPlayheads.length=0;midiActivity=0;
   document.getElementById('devSel').disabled=false;
   document.getElementById('actBtn').textContent='▶  ACTIVATE';
   document.getElementById('actBtn').classList.remove('on');
@@ -1189,24 +1422,105 @@ function stopAll(){
   document.querySelectorAll('.ld').forEach(d=>d.className='ld');
   document.querySelectorAll('.mk').forEach(d=>d.classList.remove('on'));
   pill('fPill','LIVE','var(--t3)','var(--border)');pill('rPill','FWD','var(--t3)','var(--border)');
-  setSt('CONNECT FOCUSRITE / GUITAR / SEQTRAK / MIDI','var(--t3)');
-  document.getElementById('frzBtn').classList.remove('on');
+  setSt('CONNECT FOCUSRITE / GUITAR / MIDI','var(--t3)');
   document.getElementById('rvBtn').classList.remove('on');
-  document.getElementById('frzBadge').classList.remove('show');
+  const badge=document.getElementById('frzBadge');if(badge)badge.classList.remove('show');
+  _clearSlotUI('A');_clearSlotUI('B');
 }
 
-function toggleFreeze(){
-  frozen=!frozen;
-  document.getElementById('frzBtn').classList.toggle('on',frozen);
-  document.getElementById('frzBadge').classList.toggle('show',frozen);
-  pill('fPill',frozen?'❄ FRZ':'LIVE',frozen?'#22d3ee':'var(--t3)',frozen?'#22d3ee55':'var(--border)');
+function toggleFreezeA(){
+  if(!live||!aCtx)return;
+  const b=snap(aCtx);if(!b)return;
+  if(frozenA)engA.stop();
+  frozenAlgoA=curAlgo;
+  engA.gf=frozenAlgoA.gf;
+  engA.vizColor=frozenAlgoA.color;
+  engA.setBuffers(b.fwd,b.rev);
+  Object.assign(engA,{grainMs:P.grainMs,density:P.density,pos:P.pos,spread:P.spread,pitch:P.pitch,reverse:false});
+  gainA.gain.setTargetAtTime(P.mixA,aCtx.currentTime,.06);
+  engA.start();
+  frozenA=true;
+  _updateSlotUI('A',frozenAlgoA);
+  updateFrzBadge();
 }
+function clearFreezeA(){
+  if(!aCtx)return;
+  engA?.stop();
+  if(gainA)gainA.gain.setTargetAtTime(0,aCtx.currentTime,.12);
+  frozenA=false;frozenAlgoA=null;
+  _clearSlotUI('A');
+  updateFrzBadge();
+}
+function toggleFreezeB(){
+  if(!live||!aCtx)return;
+  const b=snap(aCtx);if(!b)return;
+  if(frozenB)engB.stop();
+  frozenAlgoB=curAlgo;
+  engB.gf=frozenAlgoB.gf;
+  engB.vizColor=frozenAlgoB.color;
+  engB.setBuffers(b.fwd,b.rev);
+  Object.assign(engB,{grainMs:P.grainMs,density:P.density,pos:P.pos,spread:P.spread,pitch:P.pitch,reverse:false});
+  gainB.gain.setTargetAtTime(P.mixB,aCtx.currentTime,.06);
+  engB.start();
+  frozenB=true;
+  _updateSlotUI('B',frozenAlgoB);
+  updateFrzBadge();
+}
+function clearFreezeB(){
+  if(!aCtx)return;
+  engB?.stop();
+  if(gainB)gainB.gain.setTargetAtTime(0,aCtx.currentTime,.12);
+  frozenB=false;frozenAlgoB=null;
+  _clearSlotUI('B');
+  updateFrzBadge();
+}
+function _updateSlotUI(x,algo){
+  const slot=document.getElementById(`slot${x}`);
+  slot.classList.add('frozen');
+  slot.style.setProperty('--sc',algo.color);
+  // Algo name
+  const nameEl=document.getElementById(`slotName${x}`);
+  if(nameEl){nameEl.textContent=algo.name;nameEl.style.color=algo.color;}
+  // Swap empty → active
+  const emptyEl=document.getElementById(`slotEmpty${x}`);
+  const activeEl=document.getElementById(`slotActive${x}`);
+  if(emptyEl)emptyEl.style.display='none';
+  if(activeEl)activeEl.style.display='flex';
+  // MIX slider — set value and accent color
+  const sl=document.getElementById(`mixSlider${x}`);
+  if(sl){sl.value=P[`mix${x}`];sl.style.setProperty('--sc',algo.color);}
+  const sv=document.getElementById(`mixVal${x}`);
+  if(sv)sv.textContent=P[`mix${x}`].toFixed(2);
+  // MIX val color
+  if(sv)sv.style.color=algo.color;
+  // Pulse dot color
+  const pd=activeEl?.querySelector('.lc-pulse-dot');
+  if(pd)pd.style.cssText=`background:${algo.color};box-shadow:0 0 8px ${algo.color};`;
+}
+function _clearSlotUI(x){
+  const slot=document.getElementById(`slot${x}`);
+  slot.classList.remove('frozen');slot.style.removeProperty('--sc');
+  const emptyEl=document.getElementById(`slotEmpty${x}`);
+  const activeEl=document.getElementById(`slotActive${x}`);
+  if(emptyEl)emptyEl.style.display='flex';
+  if(activeEl)activeEl.style.display='none';
+  const btn=document.getElementById(`frzBtn${x}`);
+  if(btn){btn.querySelector('.sfn').textContent=`❄ FREEZE ${x}`;btn.style.removeProperty('--sc');btn.classList.remove('refreezing');}
+}
+function updateFrzBadge(){
+  const badge=document.getElementById('frzBadge');
+  if(frozenA&&frozenB){badge.textContent=`❄ A·${frozenAlgoA.name}  +  B·${frozenAlgoB.name}`;badge.classList.add('show');}
+  else if(frozenA){badge.textContent=`❄ LAYER A · ${frozenAlgoA.name}`;badge.classList.add('show');}
+  else if(frozenB){badge.textContent=`❄ LAYER B · ${frozenAlgoB.name}`;badge.classList.add('show');}
+  else{badge.classList.remove('show');}
+}
+
 function toggleReverse(){
-  rev=!rev;if(eng)eng.reverse=rev;
+  rev=!rev; if(eng)eng.reverse=rev;
   document.getElementById('rvBtn').classList.toggle('on',rev);
   pill('rPill',rev?'↩ REV':'FWD',rev?'#a78bfa':'var(--t3)',rev?'#a78bfa55':'var(--border)');
 }
-function pill(id,t,c,b){const el=document.getElementById(id);el.textContent=t;el.style.color=c;el.style.borderColor=b;}
+function pill(id,t,c,b){const el=document.getElementById(id);if(el){el.textContent=t;el.style.color=c;el.style.borderColor=b;}}
 function setSt(t,c){document.getElementById('sTxt').textContent=t;document.getElementById('sTxt').style.color=c;document.getElementById('sDot').style.background=c;document.getElementById('sDot').style.boxShadow=live?`0 0 8px ${c}`:'none';}
 
 loadDevs();
