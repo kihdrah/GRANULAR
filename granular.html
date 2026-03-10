@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GRANULAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Big+Shoulders+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --a:#22d3ee; --a2:#22d3ee22; --a3:#22d3ee55;
+  --bg:#0a0905; --card:#111008; --card2:#16130c;
+  --border:#251e12; --border2:#322a1a;
+  --t1:#ece8df; --t2:#9a9080; --t3:#4a4234;
+  font-family:'Space Mono','Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  width:100vw;height:100vh;overflow:hidden;
+  background:var(--bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  display:flex;align-items:stretch;
+}
+
+/* ── Full-viewport pedal shell ─────────────────────────────────────────── */
+#pedal{
+  display:flex;flex-direction:row;
+  width:100vw;height:100vh;
+  background:var(--card);
+  overflow:hidden;position:relative;
+}
+#pedal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:20;
+  background:linear-gradient(90deg,transparent 0%,var(--a) 15%,var(--a) 85%,transparent 100%);
+  opacity:0.85;transition:background .35s;box-shadow:0 0 18px var(--a3);
+}
+
+/* ══ LEFT PANEL — 58% — visualizer + brand + algo grid ════════════════════ */
+#leftPanel{
+  width:58%;flex-shrink:0;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);
+  overflow:hidden;
+}
+/* Brand header */
+#hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 14px 8px;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,#1a1307 0%,var(--card) 100%);
+}
+.hl{display:flex;align-items:center;gap:9px;}
+.logo-mark{width:26px;height:26px;flex-shrink:0;}
+.hl-text{display:flex;flex-direction:column;gap:1px;}
+.hl-text h1{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:22px;font-weight:900;letter-spacing:.14em;
+  color:var(--a);text-shadow:0 0 28px var(--a3),0 0 60px var(--a2);
+  line-height:1;transition:color .3s,text-shadow .3s;
+}
+.hl-text .sub{font-size:6px;color:var(--t3);letter-spacing:.22em;font-family:'Space Mono',monospace;}
+.hr{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+#liveDot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .4s;}
+#liveLbl{font-size:7px;color:var(--t3);letter-spacing:.16em;transition:color .3s;}
+
+/* Visualizer — takes all remaining height */
+#vizSection{flex:1;position:relative;overflow:hidden;background:#040300;}
+canvas#viz{display:block;width:100%;height:100%;}
+#vizOverlay{
+  position:absolute;inset:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+}
+#vizAlgoName{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:clamp(40px,6vw,72px);font-weight:900;letter-spacing:.1em;
+  color:#fff;opacity:.06;text-shadow:0 0 50px var(--a);
+  transition:opacity .3s;user-select:none;text-align:center;line-height:1;
+}
+#frzBadge{
+  position:absolute;top:8px;right:10px;font-size:7px;letter-spacing:.18em;
+  color:#22d3ee;background:#22d3ee12;border:1px solid #22d3ee44;
+  border-radius:4px;padding:3px 7px;display:none;
+}
+#frzBadge.show{display:block;}
+
+/* Algo grid — docked bottom of left panel */
+#algoSection{
+  flex-shrink:0;padding:7px 10px 8px;
+  border-top:1px solid var(--border);
+  background:linear-gradient(0deg,#0d0a05 0%,var(--card) 100%);
+}
+#algoBtns{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:5px;}
+.ab{
+  padding:6px 3px 5px;cursor:pointer;text-align:center;
+  border-radius:5px;border:1px solid var(--border);
+  background:#0c0a05;transition:all .15s;
+}
+.ab:hover{border-color:var(--border2);background:#120f08;}
+.ab.act{
+  border-color:var(--bc,#22d3ee);
+  background:color-mix(in srgb,var(--bc,#22d3ee) 10%,#0c0a05);
+  box-shadow:0 0 12px color-mix(in srgb,var(--bc,#22d3ee) 22%,transparent);
+}
+.acol{width:4px;height:4px;border-radius:50%;background:var(--bc,#22d3ee);margin:0 auto 3px;opacity:.3;transition:opacity .15s;}
+.ab.act .acol{opacity:1;box-shadow:0 0 5px var(--bc,#22d3ee);}
+.aname{font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--t2);display:block;transition:color .15s;}
+.ab.act .aname{color:var(--t1);}
+.atag{font-size:5px;color:var(--t3);display:block;margin-top:1px;letter-spacing:.05em;}
+.ab.act .atag{color:var(--bc,#22d3ee);opacity:.65;}
+/* Algo description: 1-line clamp at very bottom of left */
+#aDesc{
+  font-size:7px;color:var(--t2);line-height:1.5;letter-spacing:.03em;
+  padding:5px 7px;background:#0a0803;border-radius:4px;
+  border:1px solid var(--border);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+/* ══ RIGHT PANEL — 42% — all controls, no scroll ══════════════════════════ */
+#rightPanel{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;height:100vh;
+}
+
+/* MIDI bar */
+#midiBar{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;background:#0c0a05;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.midi-lbl{font-size:6px;color:var(--t3);letter-spacing:.18em;}
+#midiDot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;flex-shrink:0;}
+#midiTxt{font-size:6.5px;color:var(--t3);transition:color .3s;}
+#midiKeys{display:flex;gap:2px;margin-left:auto;align-items:center;}
+.mk{width:4px;height:11px;border-radius:1px;background:var(--border);transition:all .1s;}
+.mk.on{background:var(--a);box-shadow:0 0 4px var(--a);}
+
+/* Knobs section — flex-shrink:0 so it takes exactly its natural size */
+#knobSec{
+  flex-shrink:0;
+  padding:10px 14px 10px;
+  border-bottom:1px solid var(--border);
+}
+/* 4 main knobs in a single row — 46px each */
+#mainK{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
+/* Secondary row: REGEN knob | FREEZE | REVERSE | SPACE knob */
+#secRow{display:flex;align-items:stretch;gap:5px;}
+.sk{flex:0 0 46px;}
+
+/* Footswitches */
+.fsw{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:6px 4px;gap:2px;cursor:pointer;
+  background:#0c0a05;border:1px solid var(--border);border-radius:7px;
+  font-family:'Space Mono',monospace;transition:all .2s;
+}
+.fsw .fi{font-size:13px;line-height:1;}
+.fsw .fn{font-size:7px;font-weight:700;letter-spacing:.14em;color:var(--t2);}
+.fsw .fh{font-size:5px;color:var(--t3);letter-spacing:.05em;}
+#frzBtn.on{background:#22d3ee0e;border-color:#22d3ee55;box-shadow:0 0 12px #22d3ee16;}
+#frzBtn.on .fn{color:#22d3ee;}
+#rvBtn.on{background:#a78bfa0e;border-color:#a78bfa55;box-shadow:0 0 12px #a78bfa16;}
+#rvBtn.on .fn{color:#a78bfa;}
+
+/* Knob component */
+.kw{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;}
+.kc{position:relative;cursor:pointer;}
+.kc svg{display:block;}
+.kc input[type=range]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;margin:0;padding:0;}
+.klbl{font-size:6.5px;color:var(--t2);letter-spacing:.1em;text-transform:uppercase;}
+.kval{font-size:9.5px;font-weight:700;letter-spacing:.04em;color:var(--a);transition:color .3s;}
+.sk .kval{font-size:8px;}
+.ktt{
+  display:none;position:absolute;bottom:calc(100% + 10px);left:50%;
+  transform:translateX(-50%);z-index:400;
+  background:#0a0803;border:1px solid #2a2010;border-radius:9px;
+  padding:9px 11px;width:160px;pointer-events:none;
+  box-shadow:0 18px 45px rgba(0,0,0,.95);
+}
+.kw:hover .ktt{display:block;}
+.ktt-n{font-size:7px;color:var(--a);letter-spacing:.12em;margin-bottom:4px;font-weight:700;}
+.ktt-d{font-size:6.5px;color:var(--t2);line-height:1.6;}
+.ktt::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#2a2010;}
+
+/* ── Grain Scope section — fills space between knobs and IO ─────────────── */
+#grainScope{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;border-bottom:1px solid var(--border);
+  min-height:0; /* allow flex shrink */
+}
+#scopeHdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 12px 4px;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  background:#080604;
+}
+.scope-lbl{
+  font-size:6px;letter-spacing:.22em;color:var(--t3);
+  font-family:'Space Mono',monospace;text-transform:uppercase;
+}
+.scope-srcs{display:flex;align-items:center;gap:10px;}
+.src-item{display:flex;align-items:center;gap:4px;}
+.src-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--border);transition:background .2s,box-shadow .2s;
+}
+.src-dot.guitar-on{background:#e85518;box-shadow:0 0 6px #e8551866;}
+.src-dot.midi-on{background:var(--a);box-shadow:0 0 6px var(--a3);}
+.src-name{font-size:6px;letter-spacing:.12em;color:var(--t3);font-family:'Space Mono',monospace;}
+#scopeCanvas{display:block;width:100%;flex:1;min-height:0;}
+
+/* IO section — compact, no longer flex:1 */
+#ioSec{
+  flex-shrink:0;display:flex;flex-direction:column;
+  padding:9px 14px 10px;
+}
+.iolbl{font-size:6.5px;color:var(--t3);letter-spacing:.18em;margin-bottom:5px;}
+#devSel{
+  width:100%;background:#0c0a05;border:1px solid var(--border);
+  border-radius:5px;color:var(--t1);font-size:8px;padding:6px 8px;
+  font-family:'Space Mono',monospace;outline:none;cursor:pointer;margin-bottom:6px;
+}
+#devSel:disabled{color:var(--t3);cursor:not-allowed;}
+#latRow{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.llbl{font-size:6.5px;color:var(--t3);letter-spacing:.14em;}
+.ldots{display:flex;gap:3px;}
+.ld{width:7px;height:7px;border-radius:2px;background:#1a1508;transition:all .3s;}
+.ld.g{background:#4ade80;box-shadow:0 0 5px #4ade8077;}
+.ld.o{background:#f59e0b;box-shadow:0 0 5px #f59e0b77;}
+.ld.r{background:#ef4444;box-shadow:0 0 5px #ef444477;}
+#latTxt{font-size:7px;color:var(--t3);margin-left:2px;}
+#statusRow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 9px;background:#0c0a05;border-radius:5px;
+  border:1px solid var(--border);margin-bottom:7px;
+}
+.srl{display:flex;align-items:center;gap:5px;}
+#sDot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;flex-shrink:0;}
+#sTxt{font-size:6.5px;color:var(--t3);letter-spacing:.05em;}
+.pills{display:flex;gap:4px;}
+.pill{font-size:6px;letter-spacing:.08em;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:var(--t3);transition:all .3s;}
+#actBtn{
+  width:100%;padding:11px 0;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--a) 11%,#0a0905),color-mix(in srgb,var(--a) 5%,#0a0905));
+  border:1px solid var(--a3);border-radius:7px;cursor:pointer;
+  color:var(--a);font-size:10.5px;font-weight:700;letter-spacing:.34em;
+  font-family:'Space Mono',monospace;text-shadow:0 0 18px var(--a3);
+  box-shadow:0 0 22px var(--a2);transition:all .3s;
+}
+#actBtn:hover{box-shadow:0 0 38px var(--a3);border-color:var(--a);}
+#actBtn.on{background:linear-gradient(135deg,#160606,#220909);border-color:#ef444455;color:#ef4444;text-shadow:0 0 18px #ef444455;box-shadow:0 0 22px #ef444418;}
+#footer{display:flex;align-items:center;justify-content:center;gap:6px;padding-top:6px;}
+.f-brand{font-family:'Big Shoulders Display',sans-serif;font-size:8px;font-weight:900;letter-spacing:.16em;color:var(--a);opacity:.25;}
+.f-sep{font-size:6.5px;color:var(--t3);opacity:.35;}
+.f-tag{font-size:5.5px;color:var(--t3);letter-spacing:.1em;opacity:.45;}
+</style>
+</head>
+<body>
+<div id="pedal">
+
+  <!-- ═══ LEFT PANEL: visualizer + algo selector ═══ -->
+  <div id="leftPanel">
+
+    <!-- Brand header -->
+    <div id="hdr">
+      <div class="hl">
+        <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="16.5" stroke="var(--a)" stroke-width="1" opacity="0.2"/>
+          <rect x="6"  y="9"   width="24" height="2.5" rx="1.25" fill="var(--a)" opacity="0.9"/>
+          <rect x="9"  y="13.5" width="14" height="2.5" rx="1.25" fill="var(--a)" opacity="0.65"/>
+          <rect x="5"  y="18"  width="26" height="2.5" rx="1.25" fill="var(--a)" opacity="0.9"/>
+          <rect x="11" y="22.5" width="10" height="2.5" rx="1.25" fill="var(--a)" opacity="0.5"/>
+          <rect x="7"  y="27"  width="22" height="2.5" rx="1.25" fill="var(--a)" opacity="0.75"/>
+        </svg>
+        <div class="hl-text">
+          <h1>GRANULAR</h1>
+          <div class="sub">by kihdrah · grain. texture. noise.</div>
+        </div>
+      </div>
+      <div class="hr">
+        <div id="liveDot"></div>
+        <div id="liveLbl">STANDBY</div>
+      </div>
+    </div>
+
+    <!-- Visualizer — flex:1, fills all remaining height -->
+    <div id="vizSection">
+      <canvas id="viz"></canvas>
+      <div id="vizOverlay"><div id="vizAlgoName">GRANULAR</div></div>
+      <div id="frzBadge">❄ FROZEN</div>
+    </div>
+
+    <!-- Algo selector docked at bottom of left panel -->
+    <div id="algoSection">
+      <div id="algoBtns"></div>
+      <div id="aDesc">Select an algorithm to begin.</div>
+    </div>
+
+  </div><!-- /leftPanel -->
+
+  <!-- ═══ RIGHT PANEL: all controls ═══ -->
+  <div id="rightPanel">
+
+    <!-- MIDI bar -->
+    <div id="midiBar">
+      <span class="midi-lbl">MIDI</span>
+      <div id="midiDot"></div>
+      <span id="midiTxt">No MIDI device detected</span>
+      <div id="midiKeys">
+        <div class="mk" id="mk0"></div><div class="mk" id="mk1"></div>
+        <div class="mk" id="mk2"></div><div class="mk" id="mk3"></div>
+        <div class="mk" id="mk4"></div><div class="mk" id="mk5"></div>
+        <div class="mk" id="mk6"></div><div class="mk" id="mk7"></div>
+      </div>
+    </div>
+
+    <!-- Knobs -->
+    <div id="knobSec">
+      <div id="mainK"></div>
+      <div id="secRow">
+        <div class="sk" id="skL"></div>
+        <button class="fsw" id="frzBtn" onclick="toggleFreeze()">
+          <span class="fi">❄</span><span class="fn">FREEZE</span><span class="fh">hold buffer</span>
+        </button>
+        <button class="fsw" id="rvBtn" onclick="toggleReverse()">
+          <span class="fi">↩</span><span class="fn">REVERSE</span><span class="fh">play back</span>
+        </button>
+        <div class="sk" id="skR"></div>
+      </div>
+    </div>
+
+    <!-- ── Grain Scope: Signal Flow ── -->
+    <div id="grainScope">
+      <div id="scopeHdr">
+        <span class="scope-lbl">SIGNAL FLOW</span>
+        <div class="scope-srcs">
+          <div class="src-item">
+            <div class="src-dot" id="guitarSrcDot"></div>
+            <span class="src-name">GUITAR</span>
+          </div>
+          <div class="src-item">
+            <div class="src-dot" id="midiSrcDot"></div>
+            <span class="src-name">MIDI</span>
+          </div>
+        </div>
+      </div>
+      <canvas id="scopeCanvas"></canvas>
+    </div>
+
+    <!-- IO -->
+    <div id="ioSec">
+      <div class="iolbl">── AUDIO INPUT ──────────────────────</div>
+      <select id="devSel"><option value="">Activate → allow mic → choose input</option></select>
+      <div id="latRow">
+        <span class="llbl">LATENCY</span>
+        <div class="ldots">
+          <div class="ld" id="ld0"></div><div class="ld" id="ld1"></div>
+          <div class="ld" id="ld2"></div><div class="ld" id="ld3"></div>
+          <div class="ld" id="ld4"></div>
+        </div>
+        <span id="latTxt">— inactive</span>
+      </div>
+      <div id="statusRow">
+        <div class="srl"><div id="sDot"></div><span id="sTxt">CONNECT FOCUSRITE / GUITAR / MIDI</span></div>
+        <div class="pills">
+          <span class="pill" id="fPill">LIVE</span>
+          <span class="pill" id="rPill">FWD</span>
+        </div>
+      </div>
+      <button id="actBtn" onclick="toggleActivate()">▶  ACTIVATE</button>
+      <div id="footer">
+        <span class="f-brand">GRANULAR</span>
+        <span class="f-sep">·</span>
+        <span class="f-tag">by kihdrah</span>
+        <span class="f-sep">·</span>
+        <span class="f-tag">grain. texture. noise.</span>
+      </div>
+    </div>
+
+  </div><!-- /rightPanel -->
+
+</div><!-- /pedal -->
+
+<script>
+// ─── Algorithms ───────────────────────────────────────────────────────────────
+const ALGOS=[
+  {id:'blur',   name:'BLUR',   tag:'ambient smear',    color:'#22d3ee',
+   desc:'Long overlapping grains dissolve your signal into a seamless ambient wash. The classic drone texture — works on guitar, Seqtrak, and MIDI keys.',
+   kl:['GRAIN','SMEAR','PITCH','MIX'],kt:['Grain length. 100–300ms for the classic ambient smear.','Scatter radius from read position. Low = focused wash, high = spreading shimmer.','Playback speed. 1.0× = original pitch. Try 0.5× for sub-octave depth.','Wet/dry mix. 0.7–0.8 works well.'],
+   d:{grainMs:200,density:9,pos:.5,spread:.12,pitch:1,blend:.75,fb:.25,rv:.65},
+   gf:(e,gs,pos,p)=>({gs,pos,p})},
+  {id:'spray',  name:'SPRAY',  tag:'shimmer cloud',    color:'#a78bfa',
+   desc:'Grains scattered randomly across the buffer form a shimmering cloud. High scatter + PITCH 1.5× or 2.0× creates the classic shimmer above your signal.',
+   kl:['SIZE','SCATTER','PITCH','MIX'],kt:['Grain size. 50–100ms makes finer shimmer texture.','Scatter width. Push high for full shimmer cloud effect.','1.5× = fifth up. 2.0× = octave shimmer above your signal.','Wet/dry mix.'],
+   d:{grainMs:65,density:18,pos:.5,spread:.45,pitch:1.5,blend:.78,fb:.28,rv:.68},
+   gf:(e,gs,pos,p)=>({gs,pos:Math.random(),p:p*(1+(Math.random()-.5)*.1)})},
+  {id:'glitch', name:'GLITCH', tag:'digital chaos',    color:'#f59e0b',
+   desc:'Ultra-short grains at random positions with per-grain pitch randomisation. Metal riffs through the Blackstar become circuit-bent digital shards.',
+   kl:['SLICE','CHAOS','PITCH','MIX'],kt:['Base slice length. 20–50ms for maximum glitch.','Position chaos. High = complete unpredictability.','Base pitch. Each grain adds its own random pitch on top.','High blend = pure glitch.'],
+   d:{grainMs:22,density:26,pos:.5,spread:.5,pitch:1,blend:.88,fb:.42,rv:.22},
+   gf:(e,gs,pos,p)=>({gs:Math.random()*.035+.008,pos:Math.random(),p:p*(.5+Math.random()*1.5)})},
+  {id:'micro',  name:'MICRO',  tag:'micro-loop',       color:'#fb923c',
+   desc:'Tight micro-loops clustered around the read position. The most usable for live drone with MIDI keys — low spread keeps grains locked for stutter textures.',
+   kl:['LOOP','TIGHT','PITCH','MIX'],kt:['Loop size. Below 70ms for tight rhythmic stutter.','Cluster tightness. Low = micro-loop feel.','Tiny detune (0.98×) adds chorus width.','Wet/dry mix.'],
+   d:{grainMs:35,density:13,pos:.5,spread:.04,pitch:1,blend:.7,fb:.3,rv:.38},
+   gf:(e,gs,pos,p)=>({gs:Math.min(.06,Math.max(.012,gs)),pos:Math.max(0,Math.min(1,pos+(Math.random()-.5)*.035)),p})},
+  {id:'string', name:'STRING', tag:'harmonic grain',   color:'#4ade80',
+   desc:'Each grain pitch-shifts to a harmonic interval — octaves, fifths, thirds. MIDI keys bloom into chord-like textures. Single notes become full harmonics.',
+   kl:['LENGTH','SPREAD','DETUNE','MIX'],kt:['Grain length. 150–300ms for fuller harmonic swells.','Position spread. Low = harmonics from same moment.','Base pitch quantised to harmonics.','Wet/dry mix.'],
+   d:{grainMs:140,density:8,pos:.5,spread:.1,pitch:1,blend:.72,fb:.2,rv:.58},
+   gf:(e,gs,pos,p)=>{const h=[.5,1,1.5,2,3,.75];return{gs,pos,p:p*h[Math.floor(Math.random()*h.length)]};}},
+  {id:'cloud',  name:'CLOUD',  tag:'massive texture',  color:'#60a5fa',
+   desc:'Very long dense grains build enormous walls of atmosphere. Hold a MIDI chord and watch it become a room-filling cloud. Sub-octave pitch = cavernous drone.',
+   kl:['MASS','DENSITY','PITCH','MIX'],kt:['Grain mass. 300–500ms builds the largest clouds.','Overlap density. High = thick walls.','0.5× = sub-drone. 2.0× = airy cloud.','High blend for total immersion.'],
+   d:{grainMs:360,density:15,pos:.5,spread:.2,pitch:1,blend:.82,fb:.38,rv:.82},
+   gf:(e,gs,pos,p)=>({gs:Math.max(.15,gs),pos,p})},
+  {id:'regen',  name:'REGEN',  tag:'self-regenerating',color:'#f472b6',
+   desc:'Grains from deep in the buffer feed back through themselves. Creates textures that evolve independently of your playing — set it and let it breathe.',
+   kl:['GRAIN','MEMORY','PITCH','MIX'],kt:['Grain length. Longer grains carry more melodic content.','Buffer depth. Low = very recent audio only.','Slight detune creates slow haunting drift.','Wet/dry mix.'],
+   d:{grainMs:155,density:10,pos:.85,spread:.15,pitch:1,blend:.74,fb:.72,rv:.68},
+   gf:(e,gs,pos,p)=>({gs,pos:Math.max(.55,Math.min(1,.75+(Math.random()-.5)*.35)),p:p*(1+(Math.random()-.5)*.04)})},
+  {id:'shimmer',name:'SHIMMER',tag:'octave up',        color:'#fbbf24',
+   desc:'Half the grains play at the pitch setting, half at original pitch — an octave shimmer above your signal. MIDI chords become ethereal harmonic clouds.',
+   kl:['GRAIN','SPREAD','OCTAVE','MIX'],kt:['Grain length. 150–250ms for the most musical shimmer.','Add spread for air and space.','Octave ratio. 2.0× = octave up. 1.5× = fifth up.','Wet/dry mix.'],
+   d:{grainMs:165,density:12,pos:.5,spread:.18,pitch:2,blend:.72,fb:.22,rv:.76},
+   gf:(e,gs,pos,p)=>({gs,pos,p:Math.random()>.42?p:1.0})},
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+const REC_SECS=5;
+let aCtx=null,eng=null,stream=null,cap=null,analyser=null;
+let rBuf=null,rPos=0,frozen=false,rev=false,live=false,lastUpd=0,animId=null;
+let wGain,dGain,fbGain,rvGain,inputBus=null;
+let midiAccess=null,activeNotes={},synthNodes={};
+// Grain scope state
+const gPlayheads=[];
+let midiActivity=0; // 0–1, pulsed on noteOn, decays each frame
+let curAlgo=ALGOS[0];
+const P={grainMs:200,density:9,pos:.5,spread:.12,pitch:1,blend:.75,fb:.25,rv:.65};
+
+// ─── Canvas setup ─────────────────────────────────────────────────────────────
+const cv=document.getElementById('viz'),ct=cv.getContext('2d');
+const DPR=Math.min(window.devicePixelRatio||1,2);
+let CVW=800,CVH=400;
+
+function resizeCanvas(){
+  const par=cv.parentElement;
+  CVW=par.clientWidth;
+  CVH=par.clientHeight;
+  cv.style.width=CVW+'px';cv.style.height=CVH+'px';
+  cv.width=CVW*DPR;cv.height=CVH*DPR;
+  ct.scale(DPR,DPR);
+}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+// Also respond to layout changes
+if(window.ResizeObserver){
+  new ResizeObserver(()=>resizeCanvas()).observe(cv.parentElement);
+}
+
+// ─── Grain Scope canvas setup ─────────────────────────────────────────────────
+const cv2=document.getElementById('scopeCanvas'),ct2=cv2.getContext('2d');
+let SCW=400,SCH=200;
+function resizeScope(){
+  const par=cv2.parentElement;
+  SCW=par.clientWidth; SCH=par.clientHeight;
+  if(SCW<1||SCH<1)return;
+  cv2.style.width=SCW+'px'; cv2.style.height=SCH+'px';
+  cv2.width=SCW*DPR; cv2.height=SCH*DPR;
+  ct2.setTransform(1,0,0,1,0,0); ct2.scale(DPR,DPR);
+}
+resizeScope();
+if(window.ResizeObserver){
+  new ResizeObserver(()=>resizeScope()).observe(cv2.parentElement);
+}
+
+// ─── Tie-dye visualizer ───────────────────────────────────────────────────────
+// Inspired by Hologram Electronics product photography:
+// large overlapping color blobs, warm oil-paint bleeding, high saturation
+
+// Per-algorithm tie-dye palettes — each has 5 colors:
+// 2 warm anchors (orange/coral always present for brand warmth)
+// 3 algorithm-specific colors
+// Colors are rich and saturated, not pastel
+const PALETTES={
+  blur:   ['#e85518','#d04428','#15a898','#0878c8','#5828a8'],
+  spray:  ['#e85518','#c83898','#8818d8','#a028c8','#e85518'],
+  glitch: ['#f06808','#e83818','#f0a808','#b84808','#e05808'],
+  micro:  ['#e86018','#f08828','#e04010','#d07818','#e85518'],
+  string: ['#e85518','#18a858','#08986a','#28c878','#a8c018'],
+  cloud:  ['#e85518','#183898','#0828b8','#2848d8','#482898'],
+  regen:  ['#e85518','#d81888','#a80898','#e838a8','#880868'],
+  shimmer:['#e08808','#f0b808','#e86008','#d89808','#c86808'],
+};
+
+// 8 blobs — 4 large anchors + 4 smaller accent blobs
+// Sized relative to CVH so they fill the horizontal strip like the product photos
+const BLOBS=Array.from({length:8},(_,i)=>({
+  // Spread evenly across x, centered vertically with slight offset
+  x: i<4 ? 0.08+i*0.28 : 0.18+((i-4)*0.26),
+  y: i<4 ? 0.3+Math.random()*.4 : 0.2+Math.random()*.6,
+  vx:(Math.random()-.5)*.0005,
+  vy:(Math.random()-.5)*.0003,
+  // Large blobs: 0.65-0.9 × canvas height as radius — fills the strip
+  baseR: i<4 ? 0.70+Math.random()*.20 : 0.45+Math.random()*.20,
+  r:0, phase:Math.random()*Math.PI*2,
+  speed:0.18+Math.random()*.22,
+  ci:i%5
+}));
+
+let fqD=new Uint8Array(64),wvD=new Uint8Array(256);
+let audioEnergy=0;
+const parts=[];
+function spawnPart(){
+  const x=CVW*(.2+Math.random()*.6),y=CVH*(.3+Math.random()*.4);
+  parts.push({x,y,vx:(Math.random()-.5)*1.6,vy:-(0.5+Math.random()*1.4),
+    life:1,dec:.013+Math.random()*.02,sz:1.3+Math.random()*2.8,c:curAlgo.color});
+}
+
+// Parse hex to rgb once
+function hexRgb(hex){
+  return[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
+}
+
+function drawFrame(){
+  ct.clearRect(0,0,CVW,CVH);
+  const t=Date.now()/1000;
+  const pal=PALETTES[curAlgo.id]||PALETTES.blur;
+
+  if(live&&analyser){
+    analyser.getByteFrequencyData(fqD);
+    analyser.getByteTimeDomainData(wvD);
+    let sum=0;for(let i=0;i<fqD.length;i++)sum+=fqD[i];
+    audioEnergy+=(sum/(fqD.length*255)-audioEnergy)*.12;
+  } else { audioEnergy*=.96; }
+
+  // ── Tie-dye blob background ────────────────────────────────────────────────
+  // Warm dark amber base — visible, not black — so blobs read as paint on canvas
+  ct.fillStyle='#1e0e06';
+  ct.fillRect(0,0,CVW,CVH);
+
+  // First pass: large blobs with screen blending for additive color mix
+  // This creates the bright overlapping zones like physical paint bleeding
+  ct.globalCompositeOperation='screen';
+
+  BLOBS.forEach((b,i)=>{
+    b.x+=b.vx; b.y+=b.vy;
+    if(b.x<-.4)b.x=1.4; if(b.x>1.4)b.x=-.4;
+    if(b.y<-.4)b.y=1.4; if(b.y>1.4)b.y=-.4;
+
+    const breathe=Math.sin(t*b.speed+b.phase);
+    // Radius is fraction of canvas height — makes blobs huge in the narrow strip
+    b.r=(b.baseR+breathe*.06+audioEnergy*.35)*CVH;
+
+    const bx=b.x*CVW, by=b.y*CVH;
+    const col=pal[b.ci%pal.length];
+    const [pr,pg,pb]=hexRgb(col);
+
+    // Large blobs: high alpha so overlaps create rich color
+    const alpha=i<4
+      ? 0.32+audioEnergy*.18   // large anchors — strong
+      : 0.20+audioEnergy*.12;  // accent blobs — lighter
+
+    const grd=ct.createRadialGradient(bx,by,0,bx,by,b.r);
+    grd.addColorStop(0,  `rgba(${pr},${pg},${pb},${alpha})`);
+    grd.addColorStop(0.4,`rgba(${pr},${pg},${pb},${alpha*.7})`);
+    grd.addColorStop(0.75,`rgba(${pr},${pg},${pb},${alpha*.25})`);
+    grd.addColorStop(1,  `rgba(${pr},${pg},${pb},0)`);
+    ct.fillStyle=grd;
+    ct.fillRect(0,0,CVW,CVH);
+  });
+
+  // Second pass: overlay small accent blobs with 'overlay' blend
+  // Creates deeper color saturation in centre zones
+  ct.globalCompositeOperation='overlay';
+  const accentCol=pal[1];
+  const [ar,ag,ab]=hexRgb(accentCol);
+  const ag2=ct.createRadialGradient(CVW*.5,CVH*.5,0,CVW*.5,CVH*.5,CVH*.9);
+  ag2.addColorStop(0,`rgba(${ar},${ag},${ab},${.12+audioEnergy*.1})`);
+  ag2.addColorStop(1,`rgba(${ar},${ag},${ab},0)`);
+  ct.fillStyle=ag2; ct.fillRect(0,0,CVW,CVH);
+
+  // Reset composite mode
+  ct.globalCompositeOperation='source-over';
+
+  // Thin dark vignette top+bottom edges to keep it contained
+  const vTop=ct.createLinearGradient(0,0,0,CVH*.3);
+  vTop.addColorStop(0,'rgba(10,5,2,.6)');vTop.addColorStop(1,'rgba(10,5,2,0)');
+  ct.fillStyle=vTop; ct.fillRect(0,0,CVW,CVH*.3);
+  const vBot=ct.createLinearGradient(0,CVH*.7,0,CVH);
+  vBot.addColorStop(0,'rgba(10,5,2,0)');vBot.addColorStop(1,'rgba(10,5,2,.55)');
+  ct.fillStyle=vBot; ct.fillRect(0,CVH*.7,CVW,CVH*.3);
+
+  // ── Frequency bars — transparent dark cutouts from the dye field ──────────
+  if(live&&analyser){
+    const NB=48, bW=(CVW/NB)-.6, maxH=CVH*.42;
+    const [wr,wg,wb]=hexRgb(curAlgo.color);
+
+    // Dark base under bars so bars read against the colorful bg
+    for(let i=0;i<NB;i++){
+      const v=(fqD[Math.floor(i*fqD.length/NB)]||0)/255;
+      const bh=Math.max(2,v*maxH);
+      const x=i*(CVW/NB);
+      const grd=ct.createLinearGradient(0,CVH,0,CVH-bh);
+      grd.addColorStop(0,`rgba(0,0,0,.25)`);
+      grd.addColorStop(0.5,`rgba(${wr},${wg},${wb},.45)`);
+      grd.addColorStop(1,`rgba(${wr},${wg},${wb},.9)`);
+      ct.fillStyle=grd;
+      ct.beginPath();ct.roundRect(x+.3,CVH-bh,bW,bh,2);ct.fill();
+    }
+
+    // ── Waveform ─────────────────────────────────────────────────────────────
+    const [wr2,wg2,wb2]=hexRgb(curAlgo.color);
+    // Wide dark halo behind waveform so it reads over the colorful bg
+    ct.beginPath();
+    ct.strokeStyle=`rgba(0,0,0,.4)`;
+    ct.lineWidth=7;
+    for(let i=0;i<wvD.length;i++){
+      const x=(i/(wvD.length-1))*CVW;
+      const y=CVH*.5+((wvD[i]-128)/128)*CVH*.36;
+      i===0?ct.moveTo(x,y):ct.lineTo(x,y);
+    }
+    ct.stroke();
+    // Outer color glow
+    ct.beginPath();
+    ct.strokeStyle=`rgba(${wr2},${wg2},${wb2},.35)`;
+    ct.lineWidth=5;
+    for(let i=0;i<wvD.length;i++){
+      const x=(i/(wvD.length-1))*CVW;
+      const y=CVH*.5+((wvD[i]-128)/128)*CVH*.36;
+      i===0?ct.moveTo(x,y):ct.lineTo(x,y);
+    }
+    ct.stroke();
+    // Bright core
+    ct.beginPath();
+    ct.strokeStyle=`rgba(255,255,255,.88)`;
+    ct.lineWidth=1.6;
+    ct.shadowColor=curAlgo.color; ct.shadowBlur=10;
+    for(let i=0;i<wvD.length;i++){
+      const x=(i/(wvD.length-1))*CVW;
+      const y=CVH*.5+((wvD[i]-128)/128)*CVH*.36;
+      i===0?ct.moveTo(x,y):ct.lineTo(x,y);
+    }
+    ct.stroke(); ct.shadowBlur=0;
+
+  } else {
+    // Idle: slow undulating white sine, reads over any color bg
+    const t2=Date.now()/2800;
+    ct.beginPath();
+    ct.strokeStyle=`rgba(255,255,255,.22)`;
+    ct.lineWidth=1.5;
+    for(let i=0;i<CVW;i++){
+      const y=CVH*.5+Math.sin(i/CVW*Math.PI*5+t2)*6+Math.sin(i/CVW*Math.PI*13+t2*.6)*2.5;
+      i===0?ct.moveTo(i,y):ct.lineTo(i,y);
+    }
+    ct.stroke();
+  }
+
+  // ── Grain particles — white with color shadow ─────────────────────────────
+  for(let i=parts.length-1;i>=0;i--){
+    const p=parts[i];
+    p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.98;p.life-=p.dec;
+    if(p.life<=0){parts.splice(i,1);continue;}
+    ct.globalAlpha=p.life*.8;
+    ct.shadowColor=p.c; ct.shadowBlur=6;
+    ct.fillStyle='rgba(255,255,255,.9)';
+    ct.beginPath();ct.arc(p.x,p.y,p.sz*p.life,0,Math.PI*2);ct.fill();
+  }
+  ct.globalAlpha=1; ct.shadowBlur=0;
+
+  // ── Frozen: ice-blue tint over the warm field ─────────────────────────────
+  if(frozen){
+    ct.fillStyle='rgba(100,220,255,.12)';
+    ct.fillRect(0,0,CVW,CVH);
+    // Frost edge top
+    const frost=ct.createLinearGradient(0,0,0,CVH*.4);
+    frost.addColorStop(0,'rgba(180,240,255,.18)');
+    frost.addColorStop(1,'rgba(180,240,255,0)');
+    ct.fillStyle=frost; ct.fillRect(0,0,CVW,CVH*.4);
+  }
+}
+
+function animLoop(){
+  animId=requestAnimationFrame(animLoop);
+  drawFrame();
+  drawScope();
+}
+animLoop();
+
+// ─── Grain Scope: spawn + draw ────────────────────────────────────────────────
+function spawnGrainViz(pos,grainMs,pitch){
+  // One vertical playhead per grain fire: pos=buffer position (0–1),
+  // life decays over ~grainMs worth of frames (at 60fps)
+  gPlayheads.push({
+    pos: Math.max(0,Math.min(1,pos)),
+    life: 1,
+    dec: 1/Math.max(4,(grainMs/1000)*60),
+    color: curAlgo.color,
+    pitch,
+  });
+}
+
+function drawScope(){
+  if(SCW<2||SCH<2)return;
+  ct2.clearRect(0,0,SCW,SCH);
+
+  const acol=curAlgo.color;
+  const[ar,ag,ab]=hexRgb(acol);
+  const LH=SCH*0.5;   // each lane occupies half the canvas height
+  const t=Date.now()/1000;
+
+  // ── Backgrounds ──────────────────────────────────────────────────────────────
+  ct2.fillStyle='#060402'; ct2.fillRect(0,0,SCW,LH);        // INPUT lane — slightly lighter
+  ct2.fillStyle='#030200'; ct2.fillRect(0,LH,SCW,LH);       // GRAINS lane — darker
+
+  // Lane divider
+  ct2.fillStyle='#251e12'; ct2.fillRect(0,LH,SCW,1);
+
+  // ── Lane labels ───────────────────────────────────────────────────────────────
+  ct2.font='700 7px "Space Mono"';
+  ct2.letterSpacing='0.16em';
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.50)`;
+  ct2.fillText('INPUT',10,15);
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.50)`;
+  ct2.fillText('GRAINS',10,LH+15);
+
+  // ── INPUT LANE ────────────────────────────────────────────────────────────────
+  const midY=LH*0.52;
+  const amp=LH*0.32;
+
+  if(live&&analyser){
+    analyser.getByteTimeDomainData(wvD);
+
+    // Guitar energy bar — bottom-right of input lane (thin horizontal level bar)
+    const bW=Math.max(2,audioEnergy*70);
+    const bX=SCW-bW-8; const bY=LH-10;
+    ct2.fillStyle='rgba(37,28,15,0.8)'; ct2.fillRect(SCW-80,bY,72,5);           // track
+    ct2.fillStyle=`rgba(232,85,24,${0.4+audioEnergy*0.55})`;
+    ct2.fillRect(bX,bY,bW,5);                                                    // fill
+
+    // Input waveform — glow pass
+    ct2.beginPath();
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.18)`;
+    ct2.lineWidth=4;
+    for(let i=0;i<wvD.length;i++){
+      const x=(i/(wvD.length-1))*SCW;
+      const y=midY+((wvD[i]-128)/128)*amp;
+      i===0?ct2.moveTo(x,y):ct2.lineTo(x,y);
+    }
+    ct2.stroke();
+    // Core white line (matches left-panel aesthetic)
+    ct2.beginPath();
+    ct2.strokeStyle='rgba(255,255,255,0.82)';
+    ct2.lineWidth=1.4;
+    ct2.shadowColor=acol; ct2.shadowBlur=8;
+    for(let i=0;i<wvD.length;i++){
+      const x=(i/(wvD.length-1))*SCW;
+      const y=midY+((wvD[i]-128)/128)*amp;
+      i===0?ct2.moveTo(x,y):ct2.lineTo(x,y);
+    }
+    ct2.stroke(); ct2.shadowBlur=0;
+
+    // Update DOM source indicator dots
+    const gd=document.getElementById('guitarSrcDot');
+    const md=document.getElementById('midiSrcDot');
+    if(gd)gd.className='src-dot'+(audioEnergy>0.025?' guitar-on':'');
+    if(md)md.className='src-dot'+(midiActivity>0.25?' midi-on':'');
+
+  } else {
+    // Idle gentle sine
+    ct2.beginPath();
+    ct2.strokeStyle='rgba(255,255,255,0.08)';
+    ct2.lineWidth=1.2;
+    for(let i=0;i<SCW;i++){
+      const y=midY+Math.sin(i/SCW*Math.PI*5+t*0.5)*3;
+      i===0?ct2.moveTo(i,y):ct2.lineTo(i,y);
+    }
+    ct2.stroke();
+    // Reset dots
+    const gd=document.getElementById('guitarSrcDot');
+    const md=document.getElementById('midiSrcDot');
+    if(gd)gd.className='src-dot';
+    if(md)md.className='src-dot';
+  }
+
+  // MIDI activity decay
+  midiActivity*=0.93;
+
+  // Source labels — bottom of INPUT lane (small, letterspace)
+  ct2.font='600 5.5px "Space Mono"';
+  ct2.letterSpacing='0.12em';
+  ct2.fillStyle=`rgba(232,85,24,${live?0.40+audioEnergy*0.45:0.18})`;
+  ct2.fillText('GUITAR',10,LH-6);
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},${live?0.25+midiActivity*0.55:0.15})`;
+  ct2.fillText('MIDI',58,LH-6);
+
+  // ── GRAINS LANE ───────────────────────────────────────────────────────────────
+  const gY0=LH;
+  const gMid=gY0+LH*0.5;
+  const gAmp=LH*0.25;
+
+  // Buffer waveform — very faint, gives spatial context to playheads
+  if(rBuf&&rPos>2048&&aCtx){
+    const RS=Math.floor(aCtx.sampleRate*5);
+    const len=Math.min(rPos,RS);
+    ct2.beginPath();
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.16)`;
+    ct2.lineWidth=1;
+    for(let i=0;i<SCW;i++){
+      const idx=Math.floor((i/SCW)*len)%RS;
+      const s=rBuf[idx]||0;
+      const y=gMid+s*gAmp*2.2;
+      i===0?ct2.moveTo(i,y):ct2.lineTo(i,y);
+    }
+    ct2.stroke();
+  } else {
+    // Flat centre line when no buffer yet
+    ct2.beginPath();
+    ct2.strokeStyle=`rgba(${ar},${ag},${ab},0.1)`;
+    ct2.lineWidth=1;
+    ct2.moveTo(0,gMid); ct2.lineTo(SCW,gMid);
+    ct2.stroke();
+  }
+
+  // Grain playhead vertical lines
+  for(let i=gPlayheads.length-1;i>=0;i--){
+    const g=gPlayheads[i];
+    g.life-=g.dec;
+    if(g.life<=0){gPlayheads.splice(i,1);continue;}
+
+    const[gr,gg2,gb]=hexRgb(g.color);
+    const x=g.pos*SCW;
+    const lineH=LH*0.68;
+    const lineY=gY0+(LH-lineH)*0.5;
+    const alpha=g.life;
+
+    // Wide soft glow
+    ct2.lineWidth=5;
+    ct2.strokeStyle=`rgba(${gr},${gg2},${gb},${alpha*0.22})`;
+    ct2.shadowColor=g.color; ct2.shadowBlur=10*alpha;
+    ct2.beginPath(); ct2.moveTo(x,lineY); ct2.lineTo(x,lineY+lineH); ct2.stroke();
+
+    // Bright core
+    ct2.lineWidth=1.2;
+    ct2.strokeStyle=`rgba(255,255,255,${alpha*0.88})`;
+    ct2.shadowBlur=5*alpha;
+    ct2.beginPath(); ct2.moveTo(x,lineY); ct2.lineTo(x,lineY+lineH); ct2.stroke();
+    ct2.shadowBlur=0;
+  }
+
+  // Algo name — bottom-right of GRAINS lane
+  ct2.font='700 6.5px "Space Mono"';
+  ct2.letterSpacing='0.12em';
+  ct2.fillStyle=`rgba(${ar},${ag},${ab},0.38)`;
+  const tw=ct2.measureText(curAlgo.name).width;
+  ct2.fillText(curAlgo.name,SCW-tw-10,gY0+LH-6);
+
+  // Grain count — bottom-left of GRAINS lane
+  const gc=gPlayheads.length;
+  if(gc>0){
+    ct2.fillStyle=`rgba(${ar},${ag},${ab},0.32)`;
+    ct2.fillText(`${gc} GRAIN${gc!==1?'S':''}`,10,gY0+LH-6);
+  }
+}
+
+// ─── Build Algo Buttons ───────────────────────────────────────────────────────
+const abDiv=document.getElementById('algoBtns');
+ALGOS.forEach(a=>{
+  const b=document.createElement('button');
+  b.className='ab';b.id=`ab_${a.id}`;b.style.setProperty('--bc',a.color);
+  b.innerHTML=`<div class="acol"></div><span class="aname">${a.name}</span><span class="atag">${a.tag}</span>`;
+  b.onclick=()=>selAlgo(a);
+  abDiv.appendChild(b);
+});
+setTimeout(()=>selAlgo(ALGOS[0]),40);
+
+function selAlgo(a){
+  ALGOS.forEach(x=>document.getElementById(`ab_${x.id}`)?.classList.remove('act'));
+  document.getElementById(`ab_${a.id}`).classList.add('act');
+  curAlgo=a;
+  document.documentElement.style.setProperty('--a',a.color);
+  document.documentElement.style.setProperty('--a2',a.color+'22');
+  document.documentElement.style.setProperty('--a3',a.color+'55');
+  document.getElementById('vizAlgoName').textContent=a.name;
+  document.getElementById('aDesc').textContent=a.desc;
+  a.kl.forEach((lbl,i)=>{
+    const el=document.getElementById(`klbl_m${i}`);if(el)el.textContent=lbl;
+    const td=document.getElementById(`ktd_m${i}`);if(td)td.textContent=a.kt[i];
+  });
+  Object.entries(a.d).forEach(([k,v])=>{
+    P[k]=v;applyP(k,v);
+    const inp=document.getElementById(`ki_${k}`);
+    const def=ALL_K.find(x=>x.key===k);
+    if(inp&&def){inp.value=v;updKV(k,v,def.min,def.max,def.sz);const ve=document.getElementById(`kv_${k}`);if(ve)ve.textContent=def.fmt(v);}
+  });
+  if(eng)eng.gf=a.gf;
+}
+
+// ─── Knob Defs ────────────────────────────────────────────────────────────────
+const MAIN_K=[
+  {key:'grainMs',min:10,max:500,fmt:v=>`${Math.round(v)}ms`,sz:46},
+  {key:'spread', min:0, max:.5, fmt:v=>v.toFixed(2),        sz:46},
+  {key:'pitch',  min:.25,max:4, fmt:v=>`${v.toFixed(2)}×`,  sz:46},
+  {key:'blend',  min:0, max:1,  fmt:v=>v.toFixed(2),        sz:46},
+];
+const SEC_K=[
+  {key:'fb',label:'REGEN',min:0,max:.88,fmt:v=>v.toFixed(2),sz:42,tip:'Regen / Feedback',tipd:'Granular output feeds back through a delay. High = self-perpetuating texture.'},
+  {key:'rv',label:'SPACE',min:0,max:1,  fmt:v=>v.toFixed(2),sz:42,tip:'Reverb Depth',    tipd:'Convolution reverb on granular output. Keep 0.6+ for ambient sounds.'},
+];
+const ALL_K=[...MAIN_K,...SEC_K];
+
+function mkKnob(container,def,lblId,ttId,ttDId){
+  const sz=def.sz||66,cx2=sz/2,cy2=sz/2,R=sz/2-2,TR=sz/2-10;
+  const w=document.createElement('div');w.className='kw';
+  const tt=document.createElement('div');tt.className='ktt';
+  tt.innerHTML=`<div class="ktt-n" id="${ttId||''}">${def.tip||def.label||''}</div><div class="ktt-d" id="${ttDId||''}">${def.tipd||''}</div>`;
+  w.appendChild(tt);
+  const kc=document.createElement('div');kc.className='kc';kc.style.width=sz+'px';kc.style.height=sz+'px';
+  kc.innerHTML=`<svg width="${sz}" height="${sz}"><defs>
+    <radialGradient id="kgr_${def.key}" cx="35%" cy="28%">
+      <stop offset="0%" stop-color="#3a4f6a"/><stop offset="100%" stop-color="#07101e"/>
+    </radialGradient></defs>
+    <circle cx="${cx2}" cy="${cy2}" r="${R}" fill="none" stroke="#182840" stroke-width="3"/>
+    <path id="ka_${def.key}" fill="none" stroke="var(--a)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="${cx2}" cy="${cy2}" r="${R-4.5}" fill="url(#kgr_${def.key})"/>
+    <circle cx="${cx2}" cy="${cy2}" r="${R-4.5}" fill="none" stroke="#1e3050" stroke-width=".8"/>
+    <line id="kp_${def.key}" x1="${cx2}" y1="${cy2}" stroke="var(--a)" stroke-width="2" stroke-linecap="round"/>
+    <circle id="kpd_${def.key}" r="2.2" fill="var(--a)"/>
+  </svg>`;
+  const inp=document.createElement('input');
+  inp.type='range';inp.min=def.min;inp.max=def.max;inp.step=(def.max-def.min)/300;inp.value=P[def.key];inp.id=`ki_${def.key}`;
+  inp.style.cssText='position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;margin:0;padding:0;';
+  inp.oninput=()=>{const v=parseFloat(inp.value);P[def.key]=v;updKV(def.key,v,def.min,def.max,sz);applyP(def.key,v);document.getElementById(`kv_${def.key}`).textContent=def.fmt(v);};
+  kc.appendChild(inp);
+  const lbl=document.createElement('div');lbl.className='klbl';if(lblId)lbl.id=lblId;lbl.textContent=def.label||'';
+  const val=document.createElement('div');val.className='kval';val.id=`kv_${def.key}`;val.textContent=def.fmt(P[def.key]);
+  w.appendChild(kc);w.appendChild(lbl);w.appendChild(val);
+  container.appendChild(w);
+  updKV(def.key,P[def.key],def.min,def.max,sz);
+}
+
+const mkDiv=document.getElementById('mainK');
+MAIN_K.forEach((def,i)=>mkKnob(mkDiv,{...def,label:ALGOS[0].kl[i]},`klbl_m${i}`,`ktn_m${i}`,`ktd_m${i}`));
+mkKnob(document.getElementById('skL'),SEC_K[0]);
+mkKnob(document.getElementById('skR'),SEC_K[1]);
+ALGOS[0].kt.forEach((t,i)=>{const el=document.getElementById(`ktd_m${i}`);if(el)el.textContent=t;});
+
+function updKV(key,val,min,max,sz){
+  sz=sz||66;const cx2=sz/2,cy2=sz/2,R=sz/2-2,TR=sz/2-10;
+  const pct=(val-min)/(max-min),deg=-135+pct*270;
+  const xy=d=>({x:cx2+R*Math.sin(d*Math.PI/180),y:cy2-R*Math.cos(d*Math.PI/180)});
+  const tp=d=>({x:cx2+TR*Math.sin(d*Math.PI/180),y:cy2-TR*Math.cos(d*Math.PI/180)});
+  const s=xy(-135),e=xy(deg),tpt=tp(deg);
+  const arc=document.getElementById(`ka_${key}`),ptr=document.getElementById(`kp_${key}`),dot=document.getElementById(`kpd_${key}`);
+  if(arc)arc.setAttribute('d',`M${s.x.toFixed(1)} ${s.y.toFixed(1)} A${R} ${R} 0 ${pct>.5?1:0} 1 ${e.x.toFixed(1)} ${e.y.toFixed(1)}`);
+  if(ptr){ptr.setAttribute('x2',tpt.x.toFixed(1));ptr.setAttribute('y2',tpt.y.toFixed(1));}
+  if(dot){dot.setAttribute('cx',tpt.x.toFixed(1));dot.setAttribute('cy',tpt.y.toFixed(1));}
+}
+
+// ─── MIDI SYNTH ───────────────────────────────────────────────────────────────
+// MIDI → polyphonic oscillator synth → inputBus → granular engine
+// This is why guitar and MIDI keyboard sound different without this:
+// MIDI data is note numbers, not audio. We generate the audio from it here.
+
+function midiNoteToFreq(note){ return 440*Math.pow(2,(note-69)/12); }
+
+function noteOn(note,vel){
+  if(!aCtx||!inputBus)return;
+  if(synthNodes[note])noteOff(note);
+  midiActivity=Math.min(1,midiActivity+0.7);
+  const freq=midiNoteToFreq(note);
+  const gain=aCtx.createGain();
+  gain.gain.setValueAtTime(0,aCtx.currentTime);
+  gain.gain.linearRampToValueAtTime((vel/127)*.45,aCtx.currentTime+.012);
+  // Layered oscillators for richness: sine + detuned saw
+  const oscs=[];
+  [[freq,'sine',.7],[freq*1.003,'sawtooth',.12],[freq*.998,'triangle',.18]].forEach(([f,type,w])=>{
+    const o=aCtx.createOscillator();o.type=type;o.frequency.value=f;
+    const g=aCtx.createGain();g.gain.value=w;
+    o.connect(g);g.connect(gain);o.start();oscs.push(o);
+  });
+  // Slight LP filter for warmth
+  const filt=aCtx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=4000;filt.Q.value=.8;
+  gain.connect(filt);filt.connect(inputBus);
+  synthNodes[note]={gain,oscs,filt};
+  // MIDI key visual
+  lightKey(note,true);
+}
+
+function noteOff(note){
+  const n=synthNodes[note];if(!n)return;
+  const {gain,oscs}=n;
+  gain.gain.setTargetAtTime(0,aCtx.currentTime,.04);
+  setTimeout(()=>{try{oscs.forEach(o=>o.stop());gain.disconnect();n.filt?.disconnect();}catch(e){}},300);
+  delete synthNodes[note];
+  lightKey(note,false);
+}
+
+function lightKey(note,on){
+  // Light one of 8 indicator blocks based on note mod 8
+  const slot=note%8;
+  const el=document.getElementById(`mk${slot}`);
+  if(el)el.classList.toggle('on',on);
+}
+
+async function initMIDI(){
+  if(!navigator.requestMIDIAccess)return;
+  try{
+    midiAccess=await navigator.requestMIDIAccess();
+    const devs=[...midiAccess.inputs.values()];
+    if(devs.length>0){
+      setMidiStatus(devs[0].name||'MIDI Device',true);
+      devs.forEach(d=>{d.onmidimessage=onMIDI;});
+    } else {
+      setMidiStatus('No MIDI device — plug in and reactivate',false);
+    }
+    midiAccess.onstatechange=e=>{
+      const devs2=[...midiAccess.inputs.values()];
+      if(devs2.length>0){
+        setMidiStatus(devs2[0].name||'MIDI Device',true);
+        devs2.forEach(d=>{d.onmidimessage=onMIDI;});
+      } else {
+        setMidiStatus('No MIDI device',false);
+      }
+    };
+  }catch(e){setMidiStatus('MIDI access denied',false);}
+}
+
+function onMIDI(e){
+  const[status,note,vel]=e.data;
+  const cmd=status&0xf0;
+  if(cmd===0x90&&vel>0)noteOn(note,vel);
+  else if(cmd===0x80||(cmd===0x90&&vel===0))noteOff(note);
+}
+
+function setMidiStatus(txt,connected){
+  document.getElementById('midiTxt').textContent=txt;
+  document.getElementById('midiTxt').style.color=connected?'var(--t2)':'var(--t3)';
+  document.getElementById('midiDot').style.background=connected?'#4ade80':'var(--border)';
+  document.getElementById('midiDot').style.boxShadow=connected?'0 0 6px #4ade8077':'none';
+}
+
+// ─── Audio ────────────────────────────────────────────────────────────────────
+function applyP(k,v){
+  if(eng){if(k==='grainMs')eng.grainMs=v;if(k==='density')eng.density=v;if(k==='pos')eng.pos=v;if(k==='spread')eng.spread=v;if(k==='pitch')eng.pitch=v;}
+  if(k==='blend'){if(wGain)wGain.gain.value=v;if(dGain)dGain.gain.value=1-v;}
+  if(k==='fb'&&fbGain)fbGain.gain.value=v;
+  if(k==='rv'&&rvGain)rvGain.gain.value=v*.6;
+}
+
+function mkIR(ctx){
+  const len=Math.floor(ctx.sampleRate*3.2),ir=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.35)*(c?.85:1);}
+  return ir;
+}
+
+class GranularEngine{
+  constructor(ctx,dest,gf){Object.assign(this,{ctx,dest,gf,fwd:null,rev:null,grainMs:150,density:8,pos:.5,spread:.15,pitch:1,reverse:false,active:false,_t:null});}
+  setBuffers(f,r){this.fwd=f;this.rev=r;}
+  _fire(){
+    const buf=this.reverse?this.rev:this.fwd;if(!buf||!this.active)return;
+    const bGs=Math.max(.01,this.grainMs/1e3);
+    const bPos=Math.max(0,Math.min(1,this.pos+(Math.random()-.5)*this.spread*2));
+    const{gs,pos,p}=this.gf(this,bGs,bPos,this.pitch);
+    const fGs=Math.max(.008,gs||bGs),fPos=Math.max(0,Math.min(1,pos??bPos)),fP=Math.max(.05,Math.min(8,p||this.pitch));
+    const src=this.ctx.createBufferSource();src.buffer=buf;src.playbackRate.value=fP;
+    const env=this.ctx.createGain(),now=this.ctx.currentTime;
+    env.gain.setValueAtTime(0,now);env.gain.linearRampToValueAtTime(.55,now+fGs*.27);
+    env.gain.setValueAtTime(.55,now+fGs*.65);env.gain.linearRampToValueAtTime(0,now+fGs);
+    src.connect(env);env.connect(this.dest);
+    src.start(now,fPos*Math.max(0,buf.duration-fGs),fGs+.01);src.stop(now+fGs+.06);
+    spawnPart();
+    spawnGrainViz(fPos,fGs*1000,fP);
+  }
+  _tick(){this._fire();if(!this.active)return;this._t=setTimeout(()=>this._tick(),((0.6+Math.random()*.8)/this.density)*1e3);}
+  start(){this.active=true;this._tick();}
+  stop(){this.active=false;clearTimeout(this._t);}
+}
+
+function snap(ctx){
+  const RS=Math.floor(ctx.sampleRate*REC_SECS),len=Math.min(rPos,RS);
+  if(len<2048)return null;
+  const fwd=ctx.createBuffer(1,len,ctx.sampleRate),ch=fwd.getChannelData(0);
+  if(rPos<=RS)ch.set(rBuf.subarray(0,len));
+  else{const s=rPos%RS;ch.set(rBuf.subarray(s),0);ch.set(rBuf.subarray(0,s),RS-s);}
+  const rv=ctx.createBuffer(1,len,ctx.sampleRate),rc=rv.getChannelData(0);
+  for(let i=0;i<len;i++)rc[i]=ch[len-1-i];
+  return{fwd,rev:rv};
+}
+
+async function loadDevs(){
+  try{
+    const ds=await navigator.mediaDevices.enumerateDevices();
+    const ins=ds.filter(d=>d.kind==='audioinput');
+    const sel=document.getElementById('devSel');const pv=sel.value;sel.innerHTML='';
+    ins.forEach(d=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`Input ${d.deviceId.slice(0,8)}`;sel.appendChild(o);});
+    if(pv)sel.value=pv;
+  }catch(e){}
+}
+
+function updLat(ms){
+  document.getElementById('latTxt').textContent=`~${Math.round(ms)}ms`;
+  const lit=ms<10?1:ms<20?2:ms<40?3:ms<80?4:5,cls=ms<20?'g':ms<60?'o':'r';
+  ['ld0','ld1','ld2','ld3','ld4'].forEach((id,i)=>{const el=document.getElementById(id);el.className='ld';if(i<lit)el.classList.add(cls);});
+}
+
+async function toggleActivate(){
+  if(live){stopAll();return;}
+  setSt('REQUESTING ACCESS...','#f59e0b');
+  try{
+    const dId=document.getElementById('devSel').value;
+    const s=await navigator.mediaDevices.getUserMedia({audio:{deviceId:dId?{exact:dId}:undefined,echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
+    stream=s;await loadDevs();if(dId)document.getElementById('devSel').value=dId;
+
+    const ac=new(window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+    aCtx=ac;
+    rBuf=new Float32Array(Math.floor(ac.sampleRate*REC_SECS));rPos=0;
+
+    const micSrc=ac.createMediaStreamSource(s);
+
+    // inputBus: merges mic + MIDI synth into one signal
+    inputBus=ac.createGain();inputBus.gain.value=1;
+    micSrc.connect(inputBus);
+
+    // Analyser (fed by inputBus)
+    analyser=ac.createAnalyser();analyser.fftSize=512;analyser.smoothingTimeConstant=.8;
+    fqD=new Uint8Array(analyser.frequencyBinCount);wvD=new Uint8Array(analyser.fftSize);
+    inputBus.connect(analyser);
+
+    // Dry path: inputBus → dryGain → speakers
+    dGain=ac.createGain();dGain.gain.value=1-P.blend;
+    inputBus.connect(dGain);dGain.connect(ac.destination);
+
+    // Capture path: inputBus → scriptProcessor (silent — capture only)
+    cap=ac.createScriptProcessor(4096,1,1);
+    cap.onaudioprocess=e=>{
+      if(frozen)return;
+      const inp=e.inputBuffer.getChannelData(0);
+      const RS=Math.floor(ac.sampleRate*REC_SECS);
+      for(let i=0;i<inp.length;i++)rBuf[(rPos+i)%RS]=inp[i];
+      rPos+=inp.length;
+      const now=performance.now();
+      if(now-lastUpd>210){lastUpd=now;const b=snap(ac);if(b&&eng)eng.setBuffers(b.fwd,b.rev);}
+    };
+    inputBus.connect(cap);
+    const sg=ac.createGain();sg.gain.value=0;cap.connect(sg);sg.connect(ac.destination);
+
+    // Wet/granular path
+    const gb=ac.createGain();gb.gain.value=1.15;
+    const conv=ac.createConvolver();conv.buffer=mkIR(ac);
+    rvGain=ac.createGain();rvGain.gain.value=P.rv*.6;
+    const dly=ac.createDelay(1.5);dly.delayTime.value=.28;
+    fbGain=ac.createGain();fbGain.gain.value=P.fb;
+    dly.connect(fbGain);fbGain.connect(dly);
+    wGain=ac.createGain();wGain.gain.value=P.blend;
+    gb.connect(dly);gb.connect(conv);conv.connect(rvGain);rvGain.connect(wGain);dly.connect(wGain);wGain.connect(ac.destination);
+
+    eng=new GranularEngine(ac,gb,curAlgo.gf);
+    Object.assign(eng,{grainMs:P.grainMs,density:P.density,pos:P.pos,spread:P.spread,pitch:P.pitch,reverse:rev});
+    eng.start();live=true;
+
+    document.getElementById('devSel').disabled=true;
+    document.getElementById('actBtn').textContent='■  DEACTIVATE';
+    document.getElementById('actBtn').classList.add('on');
+    document.getElementById('liveDot').style.cssText='background:var(--a);box-shadow:0 0 10px var(--a);';
+    document.getElementById('liveLbl').textContent='LIVE';document.getElementById('liveLbl').style.color='var(--a)';
+
+    const lat=((ac.outputLatency||ac.baseLatency||.015)*1000);
+    updLat(lat);setSt(`LIVE · ${ac.sampleRate}Hz · ~${Math.round(lat)}ms`,'var(--a)');
+
+    // Init MIDI after audio context is running (browser requirement in some versions)
+    initMIDI();
+
+  }catch(e){setSt(`ERROR: ${e.message.slice(0,55)}`,'#ef4444');console.error(e);}
+}
+
+function stopAll(){
+  // Release all MIDI notes
+  Object.keys(synthNodes).forEach(n=>noteOff(parseInt(n)));
+  eng?.stop();cap?.disconnect();stream?.getTracks().forEach(t=>t.stop());aCtx?.close();
+  rBuf=null;rPos=0;lastUpd=0;frozen=false;rev=false;live=false;inputBus=null;
+  gPlayheads.length=0; midiActivity=0;
+  eng=aCtx=stream=cap=null;
+  document.getElementById('devSel').disabled=false;
+  document.getElementById('actBtn').textContent='▶  ACTIVATE';
+  document.getElementById('actBtn').classList.remove('on');
+  document.getElementById('liveDot').style.cssText='background:var(--border);';
+  document.getElementById('liveLbl').textContent='STANDBY';document.getElementById('liveLbl').style.color='';
+  document.getElementById('latTxt').textContent='— inactive';
+  document.querySelectorAll('.ld').forEach(d=>d.className='ld');
+  document.querySelectorAll('.mk').forEach(d=>d.classList.remove('on'));
+  pill('fPill','LIVE','var(--t3)','var(--border)');pill('rPill','FWD','var(--t3)','var(--border)');
+  setSt('CONNECT FOCUSRITE / GUITAR / SEQTRAK / MIDI','var(--t3)');
+  document.getElementById('frzBtn').classList.remove('on');
+  document.getElementById('rvBtn').classList.remove('on');
+  document.getElementById('frzBadge').classList.remove('show');
+}
+
+function toggleFreeze(){
+  frozen=!frozen;
+  document.getElementById('frzBtn').classList.toggle('on',frozen);
+  document.getElementById('frzBadge').classList.toggle('show',frozen);
+  pill('fPill',frozen?'❄ FRZ':'LIVE',frozen?'#22d3ee':'var(--t3)',frozen?'#22d3ee55':'var(--border)');
+}
+function toggleReverse(){
+  rev=!rev;if(eng)eng.reverse=rev;
+  document.getElementById('rvBtn').classList.toggle('on',rev);
+  pill('rPill',rev?'↩ REV':'FWD',rev?'#a78bfa':'var(--t3)',rev?'#a78bfa55':'var(--border)');
+}
+function pill(id,t,c,b){const el=document.getElementById(id);el.textContent=t;el.style.color=c;el.style.borderColor=b;}
+function setSt(t,c){document.getElementById('sTxt').textContent=t;document.getElementById('sTxt').style.color=c;document.getElementById('sDot').style.background=c;document.getElementById('sDot').style.boxShadow=live?`0 0 8px ${c}`:'none';}
+
+loadDevs();
+</script>
+</body>
+</html>
