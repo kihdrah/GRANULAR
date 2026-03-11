@@ -21,9 +21,10 @@ Works on guitar, Seqtrak, MIDI keys, or any audio input via your audio interface
 How to use
 
 No install. No dependencies. Just open index.html in Chrome or Firefox.
-bashgit clone https://github.com/[your-username]/granular
-cd granular
-open index.html
+ git clone https://github.com/kihdrah/granular
+ cd granular
+ open index.html
+
 Allow microphone access when the browser prompts — GRANULAR uses the Web Audio API to process your live input.
 
 Basic workflow
