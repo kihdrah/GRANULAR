@@ -8,13 +8,20 @@ Feed it your guitar, synth, or MIDI. It breaks the audio into fragments, scatter
 
 What it does
 
-GRANULAR runs six synthesis algorithms, each with distinct grain behaviour:
-AlgorithmCharacterBLURLong overlapping grains → seamless ambient wash. Classic drone texture.SPRAYMid-length grains scattered at random positions → shimmer and diffusion.GLITCHUltra-short grains with per-grain pitch randomisation → circuit-bent digital shards.MICROTight micro-loops clustered around read position → stutter and live drone.STRINGGrains pitch-shifted to harmonic intervals → single notes bloom into chords.CLOUDVery long dense grains → walls of atmosphere. Room-filling, cavernous.
-Layering system
+GRANULAR runs six synthesis algorithms, each with distinct grain behavior: Algorithm Character 
 
-FREEZE A — locks the current algorithm as a continuous drone layer
-FREEZE B — layer a second algorithm on top of A
-Switch algorithms freely while both layers hold
+- **BLUR:** Long overlapping grains → seamless ambient wash. Classic drone texture.
+- **SPRAY:** Mid-length grains scattered at random positions → shimmer and diffusion.
+- **GLITCH:** Ultra-short grains with per-grain pitch randomization → circuit-bent digital shards.
+- **MICRO:** Tight micro-loops clustered around read position → stutter and live drone.
+- **STRING:** Grains pitch-shifted to harmonic intervals → single notes bloom into chords.
+- **CLOUD:** Very long dense grains → walls of atmosphere. Room-filling, cavernous.
+
+### Layering system
+
+- **FREEZE A** — locks the current algorithm as a continuous drone layer
+- **FREEZE B** — layer a second algorithm on top of A
+- Switch algorithms freely while both layers hold
 
 Works on guitar, Seqtrak, MIDI keys, or any audio input via your audio interface.
 
